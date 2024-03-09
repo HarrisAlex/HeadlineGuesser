@@ -1,11 +1,13 @@
 import React from 'react';
 
+import Button from '../components/button.jsx';
+
 export default class Leaderboard extends React.Component {
     render() {
         return (
             <div>
                 <h1>Welcome to the Leaderboard Page</h1>
-                <button onClick={() => {
+                <Button label="Leaderboard" onClick={() => {
                     fetch("/api/leaderboard", {
                        method: "GET",
                        headers: {
@@ -19,7 +21,7 @@ export default class Leaderboard extends React.Component {
                             });
                         }
                     });
-                }}>Leaderboard</button>
+                }}/>
             </div>
         );
     }

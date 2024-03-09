@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
 // +==================================+
 // Incoming: { username, pass }
 // Outgoing: { status, message }
-app.get("/api/login", (req, res) => {
+app.post("/api/login", (req, res) => {
     const { username, pass } = req.body;
 
     if (!username || !pass) {
@@ -47,7 +47,7 @@ app.post("/api/signup", (req, res) => {
 // +==================================+
 // Incoming: { }
 // Outgoing: { status, question }
-app.get("/api/question", (req, res) => {
+app.post("/api/question", (req, res) => {
    return res.status(200).json({ question: "What is the capital of France?" });
 });
 
@@ -56,7 +56,7 @@ app.get("/api/question", (req, res) => {
 // +==================================+
 // Incoming: { question, answer }
 // Outgoing: { status, correct }
-app.get("/api/answer", (req, res) => {
+app.post("/api/answer", (req, res) => {
     const { question, answer } = req.body;
 
     if (!question || !answer) {
@@ -71,7 +71,7 @@ app.get("/api/answer", (req, res) => {
 // +==================================+
 // Incoming: { }
 // Outgoing: { status, leaderboard }
-app.get("/api/leaderboard", (req, res) => {
+app.post("/api/leaderboard", (req, res) => {
     return res.status(200).json({ leaderboard: [
         { username: "user1", score: 100 },
         { username: "user2", score: 90 },
