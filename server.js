@@ -46,9 +46,9 @@ app.post("/api/signup", (req, res) => {
 // |           Question API           |
 // +==================================+
 // Incoming: { }
-// Outgoing: { status, question }
+// Outgoing: { status, question, answer choices }
 app.post("/api/question", (req, res) => {
-   return res.status(200).json({ question: "What is the capital of France?" });
+   return res.status(200).json({ question: "What is the capital of France?", choices: [ "Paris", "Lyon", "Verseilles", "Notre Dame" ]});
 });
 
 // +==================================+

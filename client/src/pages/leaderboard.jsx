@@ -1,5 +1,6 @@
 import React from 'react';
 
+
 import Button from '../components/button.jsx';
 
 export default class Leaderboard extends React.Component {
@@ -7,9 +8,10 @@ export default class Leaderboard extends React.Component {
         return (
             <div>
                 <h1>Welcome to the Leaderboard Page</h1>
-                <Button label="Leaderboard" onClick={() => {
+                <Button 
+                label="Leaderboard" onClick={() => {
                     fetch("/api/leaderboard", {
-                       method: "GET",
+                       method: "POST",
                        headers: {
                            "Content-Type": "application/json"
                        },
