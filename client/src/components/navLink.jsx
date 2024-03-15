@@ -2,12 +2,13 @@ import React from 'react';
 
 import Colors from '../constants/Colors.jsx';
 
-export default class Button extends React.Component {
+export default class NavLink extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
             isHovered: false,
+            active: false
         };
     }
 
@@ -20,24 +21,28 @@ export default class Button extends React.Component {
     }
 
     render() {
+        let color;
+
+        if (this.props.active === "true")
+            color = Colors.Accent(false, 2);
+        else
+            color = this.state.isHovered ? Colors.Accent(false, 1) : Colors.Text(false);
+
         return (
-            <button 
-                type="submit" 
-                style={{
-                    background: "none",
-                    color: this.state.isHovered ? Colors.Accent(false, 1) : Colors.Text(false),
-                    borderColor: this.state.isHovered ? Colors.Accent(false, 1) : Colors.Text(false),
-                    borderWidth: "1px",
-                    borderStyle: "solid",
-                    padding: "0.5rem",
-                    borderRadius: "0.5rem",
-                    fontSize: "1rem",
-                    transition: "all 0.25s ease",
-                    cursor: "pointer"
-                }}
+            <a
                 onMouseEnter={this.handleHover}
                 onMouseLeave={this.handleUnhover}
-                {...this.props}>{this.props.label}</button>
+                style={{
+                    background: "none",
+                    color: color,
+                    borderColor: this.state.isHovered ? Colors.Accent(false, 1) : Colors.Text(false),
+                    fontSize: "1.15rem",
+                    transition: "all 0.25s ease",
+                    cursor: "pointer",
+                }}
+                {...this.props}>
+                {this.props.destination}
+            </a>
         );
     }
 }

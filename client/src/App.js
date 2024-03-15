@@ -2,6 +2,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './styles/main.css';
 
+import Colors from './constants/Colors.jsx';
+
 import Home from './pages/home.jsx';
 import Login from './pages/login.jsx';
 import Signup from './pages/signup.jsx';
@@ -10,11 +12,15 @@ import NavBar from './components/navBar.jsx';
 
 function App() {
   return (
-    <main>
+    <main style={{
+      backgroundColor: Colors.Background(false),
+      color: Colors.Text(false),
+      minHeight: "100svh"
+    }}>
       <NavBar />
       <Router>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/index" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/leaderboard" element={<Leaderboard />} />

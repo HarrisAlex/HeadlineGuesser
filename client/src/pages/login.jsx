@@ -52,9 +52,17 @@ export default class Login extends React.Component {
 
     render() {
         return (
-            <div>
+            <div style={{
+                textAlign: "center"
+            }}>
                 <h1>Welcome to the Login Page</h1>
-                <form onSubmit={this.handleSubmit}>
+                <form onSubmit={this.handleSubmit} style={{
+                    display: "flex",  
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "1.5rem",
+                }}>
                     <TextBox name="username" label={Strings.Username()} type="text" required onChange={this.handleInputChange} />
                     <TextBox name="password" label={Strings.Password()} type="password" required onChange={this.handleInputChange}/>
                     <Button label={Strings.Login()} />

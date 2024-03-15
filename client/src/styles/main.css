@@ -1,135 +1,13 @@
-:root {
-  --background: #1F1F1F;
-  --text: #E8E8E8;
-  --accent1: #FFBE0B;
-  --accent2: #FB5607;
-  --accent3: #FF006E;
-  --accent4: #8338EC;
-  --accent5: #3A86FF;
-}
-
-html,
-body {
-  width: 100vw;
-}
-
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-
-  color: var(--text);
 }
 
 html {
   font-size: 18px;
 }
 
-body {
-  background-color: var(--background);
-}
-
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  min-height: 100svh;
-}
-
-nav {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 4rem;
-
-  height: 3rem;
-}
-
-nav p {
-  font-size: 1.65rem;
-}
-
-.nav-link {
-  font-size: 1.15rem;
-}
-
-.nav-link.active {
-  color: var(--accent3);
-}
-
 a {
   text-decoration: none;
-  transition: color 0.25s ease;
-}
-
-a.active {
-  color: var(--accent2);
-}
-
-a:hover {
-  color: var(--accent1);
-}
-
-.text-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  gap: 1.5rem;
-}
-
-form .text-box {
-  width: 100%;
-}
-
-button {
-  background: none;
-  color: var(--text);
-  border-width: 1px;
-  border-color: var(--text);
-  border-style: solid;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-
-  font-size: 1rem;
-
-  transition: all 0.25s ease;
-}
-
-button:hover {
-  color: var(--accent1);
-  border-color: var(--accent1);
-
-  cursor: pointer;
-}
-
-label {
-  font-size: 1.25rem;
-}
-
-input {
-  background: none;
-  color: var(--text);
-  border: 1px solid var(--text);
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-
-  font-size: 1rem;
-
-  transition: all 0.25s ease;
-}
-
-input:focus {
-  outline: none;
-
-  border: 1px solid var(--accent1);
-  box-shadow: 0 0 8px 0 var(--accent1);
 }

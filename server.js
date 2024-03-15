@@ -63,7 +63,7 @@ app.post("/api/answer", (req, res) => {
         return res.status(400).json({ message: "Invalid question or answer" });
     }
 
-    return res.status(200).json({ correct: answer.toLowerCase() === "paris" });
+    return res.status(200).json({ correct: answer.toString().toLowerCase() === "paris" });
 });
 
 // +==================================+
