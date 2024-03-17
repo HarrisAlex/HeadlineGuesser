@@ -23,7 +23,7 @@ export default class TextBox extends React.Component {
     }
 
     render() {
-        let color = this.state.focused ? Colors.Accent(false, 3) : Colors.Text(false);
+        let color = this.state.focused ? Colors.Accent(3) : Colors.Text();
         
         return (
             <div className="text-box" style={{
@@ -45,7 +45,7 @@ export default class TextBox extends React.Component {
                     borderRadius: "0.5rem",
                     fontSize: "1rem",
                     transition: "all 0.25s ease",
-                    boxShadow: this.state.focused ? "0 0 8px 0" + Colors.Accent(false, 3) : ""
+                    boxShadow: this.state.focused ? "0 0 8px 0" + Colors.Accent(3) : ""
                 }}{...this.props}></input>
             </div>
         );

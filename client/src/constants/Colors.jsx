@@ -1,13 +1,15 @@
+let dark = localStorage.getItem("darkMode") === "true";
+
 export default class Colors {
-    static Background(dark) {
+    static Background() {
         return dark ? "#1F1F1F" : "#E8E8E8";
     }
 
-    static Text(dark) {
+    static Text() {
         return dark ? "#E8E8E8" : "#1F1F1F";
     }
 
-    static Accent(dark, level) {
+    static Accent(level) {
         if (dark) {
             switch (level) {
                 case 1:
@@ -27,19 +29,24 @@ export default class Colors {
         } else {
             switch (level) {
                 case 1:
-                    return "#FFBE0B";
+                    return "#D49C00";
                 case 2:
-                    return "#FB5607";
+                    return "#CB4303";
                 case 3:
-                    return "#FF006E";
+                    return "#CC0057";
                 case 4:
-                    return "#8338EC";
+                    return "#6414D5";
                 case 5:
-                    return "#3A86FF";
+                    return "#0060FA";
                 default:
                     console.warn("Colors.Accent() called with invalid level parameter.");
                     return "FF00FF";
             }
         }
+    }
+
+    static updateDarkMode() {
+        dark = localStorage.getItem("darkMode") === "true";
+        return;
     }
 }

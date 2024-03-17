@@ -24,9 +24,9 @@ export default class NavLink extends React.Component {
         let color;
 
         if (this.props.active === "true")
-            color = Colors.Accent(false, 2);
+            color = Colors.Accent(2);
         else
-            color = this.state.isHovered ? Colors.Accent(false, 1) : Colors.Text(false);
+            color = this.state.isHovered ? Colors.Accent(1) : Colors.Text();
 
         return (
             <a
@@ -35,7 +35,7 @@ export default class NavLink extends React.Component {
                 style={{
                     background: "none",
                     color: color,
-                    borderColor: this.state.isHovered ? Colors.Accent(false, 1) : Colors.Text(false),
+                    borderColor: this.state.isHovered ? Colors.Accent(1) : Colors.Text(),
                     fontSize: "1.15rem",
                     transition: "all 0.25s ease",
                     cursor: "pointer",

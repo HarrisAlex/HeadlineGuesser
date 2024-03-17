@@ -28,6 +28,7 @@ export default class Home extends React.Component {
                 "Content-Type": "application/json"
             }
         }).then((data) => {
+            // Check for successful response
             if (data.status === 200) {
                 data.json().then((dataJson) => {
                     // Set current question
@@ -46,6 +47,7 @@ export default class Home extends React.Component {
     }
 
     handleAnswerSubmit(choice) {
+        // Retrieve answer from backend
         fetch("/api/answer", {
             method: "POST",
             headers: {
@@ -56,6 +58,7 @@ export default class Home extends React.Component {
                 answer: choice
             })
         }).then((data) => {
+            // Check for successful response
             if (data.status === 200) {
                 data.json().then((dataJson) => {
                     console.log(dataJson.correct);

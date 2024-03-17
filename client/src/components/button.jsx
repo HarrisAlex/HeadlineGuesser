@@ -25,8 +25,8 @@ export default class Button extends React.Component {
                 type="submit" 
                 style={{
                     background: "none",
-                    color: this.state.isHovered ? Colors.Accent(false, 1) : Colors.Text(false),
-                    borderColor: this.state.isHovered ? Colors.Accent(false, 1) : Colors.Text(false),
+                    color: this.state.isHovered ? Colors.Accent(1) : Colors.Text(),
+                    borderColor: this.state.isHovered ? Colors.Accent(1) : Colors.Text(),
                     borderWidth: "1px",
                     borderStyle: "solid",
                     padding: "0.5rem",

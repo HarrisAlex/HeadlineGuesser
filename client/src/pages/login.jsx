@@ -17,6 +17,7 @@ export default class Login extends React.Component {
     }
 
     handleInputChange(event) {
+        // Get input name and value from element
         const target = event.target;
         const value = target.value;
         const name = target.name;
@@ -27,16 +28,19 @@ export default class Login extends React.Component {
     handleSubmit(event) {
         event.preventDefault();
         
+        // Send login request to backend
         fetch("/api/login", {
             method: "POST",
             headers: {
             "Content-Type": "application/json"
             },
+            // Send username and password to backend
             body: JSON.stringify({
                 username: this.state.username,
                 pass: this.state.password
             })
         }).then((data) => {
+            // Check for successful response
             if (data.status === 200) {
                 data.json().then((data) => {
                     console.log(data);
