@@ -48,6 +48,12 @@ app.post("/api/signup", (req, res) => {
 // Incoming: { }
 // Outgoing: { status, question, answer choices }
 app.post("/api/question", (req, res) => {
+    const { language } = req.body;
+
+    if (!language) {
+        return res.status(400).json({ message: "Invalid language" });
+    }
+
    return res.status(200).json({ question: "What is the capital of France?", choices: [ "Paris", "Lyon", "Verseilles", "Notre Dame" ]});
 });
 
@@ -57,7 +63,11 @@ app.post("/api/question", (req, res) => {
 // Incoming: { question, answer }
 // Outgoing: { status, correct }
 app.post("/api/answer", (req, res) => {
-    const { question, answer } = req.body;
+    const { language, question, answer } = req.body;
+
+    if (!language) {
+        return res.status(400).json({ message: "Invalid language" });
+    }
 
     if (!question || !answer) {
         return res.status(400).json({ message: "Invalid question or answer" });

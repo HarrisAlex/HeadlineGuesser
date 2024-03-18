@@ -1,5 +1,6 @@
 import React from 'react';
 
+import Strings from '../constants/Strings.jsx';
 
 import Button from '../components/button.jsx';
 
@@ -30,7 +31,7 @@ export default class Leaderboard extends React.Component {
         return (
             <div>
                 <h1>Welcome to the Leaderboard Page</h1>
-                <Button label="Leaderboard" onClick={this.retrieveLeaderboard}/>
+                <Button label={Strings.Leaderboard()} onClick={this.retrieveLeaderboard}/>
             </div>
         );
     }

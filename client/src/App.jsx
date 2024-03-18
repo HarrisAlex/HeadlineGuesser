@@ -1,7 +1,6 @@
 "use client"
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './styles/main.css';
 
 import Colors from './constants/Colors.jsx';
 
@@ -11,6 +10,8 @@ import Signup from './pages/signup.jsx';
 import Leaderboard from './pages/leaderboard.jsx';
 import NavBar from './components/navBar.jsx';
 import DarkModeToggle from './components/darkModeToggle.jsx';
+import LanguageSelector from './components/languageSelector.jsx';
+import LanguageSelectorButton from './components/languageSelectorButton.jsx';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -19,7 +20,8 @@ export default class App extends React.Component {
     this.handleDarkModeToggle = this.handleDarkModeToggle.bind(this);
 
     this.state = {
-      darkMode: localStorage.getItem("darkMode") === "true"
+      darkMode: localStorage.getItem("darkMode") === "true",
+      languageSelectWindowOpen: false
     };
   }
 
@@ -33,6 +35,10 @@ export default class App extends React.Component {
 
     // Update the state to force a re-render
     this.setState({ darkMode: localStorage.getItem("darkMode") === "true" });
+  }
+
+  handleLanguageSelectButton = () => {
+    this.setState({ languageSelectWindowOpen: !this.state.languageSelectWindowOpen });
   }
 
   render() {
@@ -52,8 +58,9 @@ export default class App extends React.Component {
             <Route path="/leaderboard" element={<Leaderboard />} />
           </Routes>
         </Router>
-        <DarkModeToggle
-          onClick={this.handleDarkModeToggle} />
+        <LanguageSelectorButton onClick={this.handleLanguageSelectButton} />
+        <DarkModeToggle onClick={this.handleDarkModeToggle} />
+        <LanguageSelector isOpen={this.state.languageSelectWindowOpen}/>
       </main>
     );
   }

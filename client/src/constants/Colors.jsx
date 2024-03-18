@@ -44,6 +44,14 @@ export default class Colors {
             }
         }
     }
+    
+    static GlassPanel() {
+        return dark ? "#35353580" : "#D8D8D880";
+    }
+
+    static GlassPanelBorder() {
+        return dark ? "#1C1C1C" : "#C8C8C8";
+    }
 
     static updateDarkMode() {
         dark = localStorage.getItem("darkMode") === "true";
