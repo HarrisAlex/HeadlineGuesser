@@ -1,3 +1,5 @@
+let language = localStorage.getItem("language");
+
 export default class Strings {
     static Username() {
         return "Username";
@@ -33,5 +35,22 @@ export default class Strings {
 
     static ChooseLanguage() {
         return "Choose your Language";
+    }
+
+    static English() {
+        return "English";
+    }
+
+    static Spanish() {
+        return "Español"
+    }
+
+    static French() {
+        return "Français";
+    }
+
+    static UpdateLanguage() {
+        language = localStorage.getItem("language");
+        return;
     }
 }

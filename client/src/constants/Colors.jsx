@@ -53,7 +53,7 @@ export default class Colors {
         return dark ? "#1C1C1C" : "#C8C8C8";
     }
 
-    static updateDarkMode() {
+    static UpdateDarkMode() {
         dark = localStorage.getItem("darkMode") === "true";
         return;
     }
