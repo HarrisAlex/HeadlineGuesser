@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { LanguageContext } from '../contexts/LanguageContext.js';
+
 import Strings from '../constants/Strings.jsx';
 
 import Button from '../components/button.jsx';
@@ -76,44 +78,52 @@ export default class Home extends React.Component {
     render() {
         if (this.state.mode === "question") {
             return (
-                <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "2rem",
-                    height: "calc(100svh - 4rem)"
-                }}>
-                    <p style={{
-                        fontSize: "2rem"
-                    }}>{this.state.question}
-                    </p>
-                    <div style={{
-                        display: "flex",
-                        gap: "1rem"
-                    }}>
-                        {this.state.choices.map((choice, index) =>  (
-                            <Button key={index} label={choice} onClick={() => this.handleAnswerSubmit(choice)} />
-                        ))}
-                    </div>
-                </div>
+                <LanguageContext.Consumer>
+                    {({ language }) => (
+                        <div style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "2rem",
+                            height: "calc(100svh - 4rem)"
+                        }}>
+                            <p style={{
+                                fontSize: "2rem"
+                            }}>{this.state.question}
+                            </p>
+                            <div style={{
+                                display: "flex",
+                                gap: "1rem"
+                            }}>
+                                {this.state.choices.map((choice, index) =>  (
+                                    <Button key={index} label={choice} onClick={() => this.handleAnswerSubmit(choice)} />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </LanguageContext.Consumer>
             );
         } else {
             return (
-                <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "2rem",
-                    height: "calc(100svh - 4rem)"
-                }}>
-                    <p style={{
-                        fontSize: "2rem"
-                    }}>{this.state.choiceCorrect ? Strings.Correct() : Strings.Incorrect()}
-                    </p>
-                    <Button label={Strings.NextQuestion()} onClick={this.handleLoad} />
-                </div>
+                <LanguageContext.Consumer>
+                    {({ language }) => (
+                        <div style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "2rem",
+                            height: "calc(100svh - 4rem)"
+                        }}>
+                            <p style={{
+                                fontSize: "2rem"
+                            }}>{this.state.choiceCorrect ? Strings.Correct(language) : Strings.Incorrect(language)}
+                            </p>
+                            <Button label={Strings.NextQuestion(language)} onClick={this.handleLoad} />
+                        </div>
+                    )}
+                    </LanguageContext.Consumer>
             );
         }
     }

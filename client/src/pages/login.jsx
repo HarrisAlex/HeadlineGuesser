@@ -3,6 +3,7 @@ import React from 'react';
 import Strings from '../constants/Strings.jsx';
 import TextBox from '../components/textBox.jsx';
 import Button from '../components/button.jsx';
+import { LanguageContext } from '../contexts/LanguageContext.js';
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -56,22 +57,26 @@ export default class Login extends React.Component {
 
     render() {
         return (
-            <div style={{
-                textAlign: "center"
-            }}>
-                <h1>Welcome to the Login Page</h1>
-                <form onSubmit={this.handleSubmit} style={{
-                    display: "flex",  
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "1.5rem",
-                }}>
-                    <TextBox name="username" label={Strings.Username()} type="text" required onChange={this.handleInputChange} />
-                    <TextBox name="password" label={Strings.Password()} type="password" required onChange={this.handleInputChange}/>
-                    <Button label={Strings.Login()} />
-                </form>
-            </div>
+            <LanguageContext.Consumer>
+                {({ language }) => (
+                    <div style={{
+                        textAlign: "center"
+                    }}>
+                        <h1>Welcome to the Login Page</h1>
+                        <form onSubmit={this.handleSubmit} style={{
+                            display: "flex",  
+                            flexDirection: "column",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "1.5rem",
+                        }}>
+                            <TextBox name="username" label={Strings.Username(language)} type="text" required onChange={this.handleInputChange} />
+                            <TextBox name="password" label={Strings.Password(language)} type="password" required onChange={this.handleInputChange}/>
+                            <Button label={Strings.Login(language)} />
+                        </form>
+                    </div>
+                )}
+            </LanguageContext.Consumer>
         );
     }
 }

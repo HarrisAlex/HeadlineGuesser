@@ -1,40 +1,132 @@
-let language = localStorage.getItem("language");
-
 export default class Strings {
-    static Username() {
-        return "Username";
+    static Home(language) {
+        switch (language) {
+            case "english":
+                return "Home";
+            case "spanish":
+                return "Inicio";
+            case "french":
+                return "Accueil";
+            default:
+                return "Home";
+        }
+    }
+    
+    static Username(language) {
+        switch (language) {
+            case "english":
+                return "Username";
+            case "spanish":
+                return "Nombre de Usuario";
+            case "french":
+                return "Nom d'Utilisateur";
+            default:
+                return "Username";
+        }
     }
 
-    static Password() {
-        return "Password";
+    static Password(language) {
+        switch (language) {
+            case "english":
+                return "Password";
+            case "spanish":
+                return "Contraseña";
+            case "french":
+                return "Mot de Passe";
+            default:
+                return "Password";
+        }
     }
 
-    static Login() {
-        return "Login";
+    static Login(language) {
+        switch (language) {
+            case "english":
+                return "Login";
+            case "spanish":
+                return "Acceso";
+            case "french":
+                return "Se cibbecter";
+            default:
+                return "Login";
+        }
     }
 
-    static Signup() {
-        return "Signup";
+    static Signup(language) {
+        switch (language) {
+            case "english":
+                return "Signup";
+            case "spanish":
+                return "Registrarse";
+            case "french":
+                return "S'inscrire";
+            default:
+                return "Signup";
+        }
     }
 
-    static NextQuestion() {
-        return "Next Question";
+    static NextQuestion(language) {
+        switch (language) {
+            case "english":
+                return "Next Question";
+            case "spanish":
+                return "Siguiente Pregunta";
+            case "french":
+                return "Question Suivante";
+            default:
+                return "Next Question";
+        }
     }
 
-    static Correct() {
-        return "Correct!";
+    static Correct(language) {
+        switch (language) {
+            case "english":
+                return "Correct!";
+            case "spanish":
+                return "¡Correcto!";
+            case "french":
+                return "Correct!";
+            default:
+                return "Correct!";
+        }
     }
 
-    static Incorrect() {
-        return "Incorrect!";
+    static Incorrect(language) {
+        switch (language) {
+            case "english":
+                return "Incorrect!";
+            case "spanish":
+                return "¡Incorrecto!";
+            case "french":
+                return "Incorrect!";
+            default:
+                return "Incorrect!";
+        }
     }
 
-    static Leaderboard() {
-        return "Leaderboard";
+    static Leaderboard(language) {
+        switch (language) {
+            case "english":
+                return "Leaderboard";
+            case "spanish":
+                return "Tabla de Clasificación";
+            case "french":
+                return "Classement";
+            default:
+                return "Leaderboard";
+        }
     };
 
-    static ChooseLanguage() {
-        return "Choose your Language";
+    static ChooseLanguage(language) {
+        switch (language) {
+            case "english":
+                return "Choose your Language";
+            case "spanish":
+                return "Elige tu Idioma";
+            case "french":
+                return "Choisissez votre Langue";
+            default:
+                return "Choose your Language";
+        }
     }
 
     static English() {
@@ -47,10 +139,5 @@ export default class Strings {
 
     static French() {
         return "Français";
-    }
-
-    static UpdateLanguage() {
-        language = localStorage.getItem("language");
-        return;
     }
 }

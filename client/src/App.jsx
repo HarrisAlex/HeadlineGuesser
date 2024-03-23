@@ -2,6 +2,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
+import { LanguageProvider } from './contexts/LanguageContext.js';
+
 import Colors from './constants/Colors.jsx';
 
 import Home from './pages/home.jsx';
@@ -11,7 +13,6 @@ import Leaderboard from './pages/leaderboard.jsx';
 import NavBar from './components/navBar.jsx';
 import DarkModeToggle from './components/darkModeToggle.jsx';
 import LanguageSelector from './components/languageSelector.jsx';
-import LanguageSelectorButton from './components/languageSelectorButton.jsx';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -31,7 +32,7 @@ export default class App extends React.Component {
     localStorage.setItem("darkMode", !dark);
 
     // Update the colors
-    Colors.updateDarkMode();
+    Colors.UpdateDarkMode();
 
     // Update the state to force a re-render
     this.setState({ darkMode: localStorage.getItem("darkMode") === "true" });
@@ -48,19 +49,20 @@ export default class App extends React.Component {
         color: Colors.Text(),
         minHeight: "100svh"
       }}>
-        <NavBar />
-        <Router>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/index" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-          </Routes>
-        </Router>
-        <LanguageSelectorButton onClick={this.handleLanguageSelectButton} />
-        <DarkModeToggle onClick={this.handleDarkModeToggle} />
-        <LanguageSelector isOpen={this.state.languageSelectWindowOpen}/>
+        <LanguageProvider>
+            <NavBar />
+            <Router>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/index" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
+            </Routes>
+            </Router>
+            <DarkModeToggle onClick={this.handleDarkModeToggle} />
+            <LanguageSelector />
+        </LanguageProvider>
       </main>
     );
   }
