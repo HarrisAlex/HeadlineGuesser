@@ -2,6 +2,9 @@ const express = require('express');
 const app = express();
 const port = 3100;
 
+const questionBank = require("./questionBank.json");
+const languages = require("./languages.json").languages;
+
 app.use(express.json());
 
 app.listen(port, () => {
@@ -10,6 +13,19 @@ app.listen(port, () => {
 
 app.get("/", (req, res) => {
     res.send("This is the API! :)");
+});
+
+// +==================================+
+// |          Language API            |
+// +==================================+
+// Incoming: { }
+// Outgoing: { status, langauge }
+app.post("/api/languages", (req, res) => {
+    return res.status(200).json({ languages: [
+        { language: "english", display: "English" },
+        { language: "spanish", display: "Español" },
+        { language: "french", display: "Français" },
+    ] });
 });
 
 // +==================================+
@@ -54,7 +70,17 @@ app.post("/api/question", (req, res) => {
         return res.status(400).json({ message: "Invalid language" });
     }
 
-   return res.status(200).json({ question: "What is the capital of France?", choices: [ "Paris", "Lyon", "Verseilles", "Notre Dame" ]});
+    if (!isValidLanguage(language)) {
+        return res.status(400).json({ message: "Invalid language" });
+    }
+
+    let question = getRandomQuestion(language);
+
+    if (!question) {
+        return res.status(500).json({ message: "Error getting question" });
+    }
+
+   return res.status(200).json({ question: question.question, choices: question.answers });
 });
 
 // +==================================+
@@ -69,11 +95,15 @@ app.post("/api/answer", (req, res) => {
         return res.status(400).json({ message: "Invalid language" });
     }
 
+    if (!isValidLanguage(language)) {
+        return res.status(400).json({ message: "Invalid language" });
+    }
+
     if (!question || !answer) {
         return res.status(400).json({ message: "Invalid question or answer" });
     }
 
-    return res.status(200).json({ correct: answer.toString().toLowerCase() === "paris" });
+    return res.status(200).json({ correct: isCorrectAnswer(language, question, answer) });
 });
 
 // +==================================+
@@ -90,3 +120,50 @@ app.post("/api/leaderboard", (req, res) => {
         { username: "user5", score: 60 },
     ] });
 });
+
+function isValidLanguage(language) {
+    return languages.includes(language);
+}
+
+function getRandomQuestion(language) {
+    if (!isValidLanguage(language)) {
+        return null;
+    }
+    
+    let questionSet = getQuestionSet(language);
+
+    if (!questionSet)
+        return null;
+
+    return questionSet.questions[Math.floor(Math.random() * questionSet.questions.length)];
+}
+
+function isCorrectAnswer(language, question, chosenAnswer) {
+    if (!isValidLanguage(language)) {
+        return false;
+    }
+
+    let correct = false;
+    let selectedQuestion;
+
+    getQuestionSet(language).questions.some((q) => {
+        if (q.question === question) {
+            selectedQuestion = q;
+            return true;
+        }
+    });
+
+    return selectedQuestion.correct === chosenAnswer.toLowerCase();
+}
+
+function getQuestionSet(language) {
+    let questionSet;
+    questionBank.languageQuestionSets.some((set) => {
+        if (set.language === language) {
+            questionSet = set;
+            return true;
+        }
+    });
+
+    return questionSet;
+}

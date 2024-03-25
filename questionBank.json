@@ -1,0 +1,49 @@
+{
+    "languageQuestionSets": [
+        {
+            "language": "english",
+            "questions": [
+                {
+                    "question": "What is the capital of France?",
+                    "answers": [
+                        "Paris",
+                        "London",
+                        "Berlin",
+                        "Madrid"
+                    ],
+                    "correct": "paris"
+                }   
+            ]
+        },
+        {
+            "language": "spanish",
+            "questions": [
+                {
+                    "question": "¿Cuál es la capital de España?",
+                    "answers": [
+                        "Paris",
+                        "London",
+                        "Berlin",
+                        "Madrid"
+                    ],
+                    "correct": "madrid"
+                }
+            ]
+        },
+        {
+            "language": "french",
+            "questions": [
+                {
+                    "question": "Quelle est la capitale de l'Espagne?",
+                    "answers": [
+                        "Paris",
+                        "London",
+                        "Berlin",
+                        "Madrid"
+                    ],
+                    "correct": "madrid"
+                }
+            ]
+        }
+    ]
+}

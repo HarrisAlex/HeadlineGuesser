@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { LanguageContext } from '../contexts/LanguageContext.js';
 
@@ -6,125 +6,118 @@ import Strings from '../constants/Strings.jsx';
 
 import Button from '../components/button.jsx';
 
-export default class Home extends React.Component {
-    constructor(props) {
-        super(props);
-        this.handleLoad = this.handleLoad.bind(this);
+export default function Home() {
+    const context = useContext(LanguageContext);
+    const [previousContext, setPreviousContext] = useState(context);
+    const [question, setQuestion] = useState("");
+    const [choices, setChoices] = useState([]);
+    const [mode, setMode] = useState("question");
+    const [choiceCorrect, setChoiceCorrect] = useState(false);
 
-        this.state = {
-            question: "",
-            choices: [],
-            mode: "question",
-            choiceCorrect: false
-        }
-    }
+    useEffect(() => {
+        if (previousContext.language !== context.language)
+            setPreviousContext(context);
+    }, [previousContext, context]);
+
+    useEffect(() => {
+        if (mode === "question") {            
+            fetch("/api/question", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ language: localStorage.getItem("language") })
+            }).then((data) => {
+                // Check for successful response
+                if (data.status === 200) {
+                    // Switch to question mode
+                    data.json().then((dataJson) => {
+                        // Set current question
+                        setQuestion(dataJson.question);
+                        setChoices(dataJson.choices);
+                    });
+                }
+            });
+        }   
+    }, [mode]);
     
-    componentDidMount() {
-        window.addEventListener("load", this.handleLoad);
-    }
-
-    componentWillUnmount() {
-        window.removeEventListener("load", this.handleLoad);
-    }
-
-    handleLoad() {
-        // Call question API from backend
-        fetch("/api/question", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ language: "english" })
-        }).then((data) => {
-            // Check for successful response
-            if (data.status === 200) {
-                // Switch to question mode
-                this.setState({ mode: "question" });
-
-                data.json().then((dataJson) => {
-                    // Set current question
-                    this.setState({ question: dataJson.question });
-                    this.setState({ choices: dataJson.choices });
-                });
-            }
-        });
-    }
-
-    handleAnswerSubmit(choice) {
-        // Retrieve answer from backend
-        fetch("/api/answer", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                language: "english",
-                question: this.state.question,
-                answer: choice
-            })
-        }).then((data) => {
-            // Check for successful response
-            if (data.status === 200) {
-                // Switch to answer mode
-                this.setState({ mode: "answer" });
-
-                data.json().then((dataJson) => {
-                    this.setState({ choiceCorrect: dataJson.correct });
-                });
-            }
-        });
-    }
-    
-    render() {
-        if (this.state.mode === "question") {
-            return (
-                <LanguageContext.Consumer>
-                    {({ language }) => (
+    if (mode === "question") {
+        return (
+            <LanguageContext.Consumer>
+                {({ language }) => (
+                    <div style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: "2rem",
+                        height: "calc(100svh - 4rem)"
+                    }}>
+                        <p style={{
+                            fontSize: "2rem"
+                        }}>{question}
+                        </p>
                         <div style={{
                             display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            gap: "2rem",
-                            height: "calc(100svh - 4rem)"
+                            gap: "1rem"
                         }}>
-                            <p style={{
-                                fontSize: "2rem"
-                            }}>{this.state.question}
-                            </p>
-                            <div style={{
-                                display: "flex",
-                                gap: "1rem"
-                            }}>
-                                {this.state.choices.map((choice, index) =>  (
-                                    <Button key={index} label={choice} onClick={() => this.handleAnswerSubmit(choice)} />
-                                ))}
-                            </div>
+                            {choices.map((choice, index) =>  (
+                                <Button key={index} label={choice} onClick={() => {
+                                    checkAnswer(language, question, choice, (correct) => {
+                                        setMode("answer");
+                                        setChoiceCorrect(correct);
+                                    });
+                                }} />
+                            ))}
                         </div>
-                    )}
+                    </div>
+                )}
+            </LanguageContext.Consumer>
+        );
+    } else {
+        return (
+            <LanguageContext.Consumer>
+                {({ language }) => (
+                    <div style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: "2rem",
+                        height: "calc(100svh - 4rem)"
+                    }}>
+                        <p style={{
+                            fontSize: "2rem"
+                        }}>{choiceCorrect ? Strings.Correct(language) : Strings.Incorrect(language)}
+                        </p>
+                        <Button label={Strings.NextQuestion(language)} onClick={() => {
+                            setMode("question");
+                        }} />
+                    </div>
+                )}
                 </LanguageContext.Consumer>
-            );
-        } else {
-            return (
-                <LanguageContext.Consumer>
-                    {({ language }) => (
-                        <div style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            gap: "2rem",
-                            height: "calc(100svh - 4rem)"
-                        }}>
-                            <p style={{
-                                fontSize: "2rem"
-                            }}>{this.state.choiceCorrect ? Strings.Correct(language) : Strings.Incorrect(language)}
-                            </p>
-                            <Button label={Strings.NextQuestion(language)} onClick={this.handleLoad} />
-                        </div>
-                    )}
-                    </LanguageContext.Consumer>
-            );
-        }
+        );
     }
+}
+
+function checkAnswer(language, question, choice, callback) {
+    fetch("/api/answer", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            language: language,
+            question: question,
+            answer: choice
+        })
+    })
+    .then((data) => {
+        // Check for successful response
+        if (data.status === 200) {
+            data.json().then((dataJson) => {
+                callback(dataJson.correct);
+            });
+        }
+    });
 }
