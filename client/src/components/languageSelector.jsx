@@ -43,7 +43,7 @@ export default class LanguageSelector extends React.Component {
     render() {
         return (
             <LanguageContext.Consumer>
-                {({ language, setLanguage }) => (
+                {({ language, setLanguage, setLanguageIndex }) => (
                     <div>
                         <div style={{
                             position: "absolute",
@@ -79,10 +79,11 @@ export default class LanguageSelector extends React.Component {
                                         justifyContent: "space-evenly",
                                         flexDirection: "column",
                                     }}>
-                                    {this.state.languages.map((lang) => (
+                                    {this.state.languages.map((lang, index) => (
                                         <Button key={lang.language} label={lang.display} onClick={() => {
                                             localStorage.setItem("language", lang.language);
                                             setLanguage(lang.language);
+                                            setLanguageIndex(index);
                                             this.toggleOpen();
                                         }}/>
                                     ))}

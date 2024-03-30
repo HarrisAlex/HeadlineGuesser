@@ -61,45 +61,37 @@ app.post("/api/signup", (req, res) => {
 // +==================================+
 // |           Question API           |
 // +==================================+
-// Incoming: { }
-// Outgoing: { status, question, answer choices }
+// Incoming: { language }
+// Outgoing: { status, question, question index, answer choices }
 app.post("/api/question", (req, res) => {
     const { language } = req.body;
-
-    if (!language) {
-        return res.status(400).json({ message: "Invalid language" });
-    }
 
     if (!isValidLanguage(language)) {
         return res.status(400).json({ message: "Invalid language" });
     }
 
-    let question = getRandomQuestion(language);
+    let randomQuestion = getRandomQuestion(language);
 
-    if (!question) {
+    if (!randomQuestion) {
         return res.status(500).json({ message: "Error getting question" });
     }
 
-   return res.status(200).json({ question: question.question, choices: question.answers });
+   return res.status(200).json({ questionString: randomQuestion.question.question, question: randomQuestion.index, choices: randomQuestion.question.answers });
 });
 
 // +==================================+
 // |           Answer API             |
 // +==================================+
-// Incoming: { question, answer }
+// Incoming: { language, question, answer }
 // Outgoing: { status, correct }
 app.post("/api/answer", (req, res) => {
     const { language, question, answer } = req.body;
-
-    if (!language) {
-        return res.status(400).json({ message: "Invalid language" });
-    }
 
     if (!isValidLanguage(language)) {
         return res.status(400).json({ message: "Invalid language" });
     }
 
-    if (!question || !answer) {
+    if (question < 0 || answer < 0) {
         return res.status(400).json({ message: "Invalid question or answer" });
     }
 
@@ -121,49 +113,33 @@ app.post("/api/leaderboard", (req, res) => {
     ] });
 });
 
-function isValidLanguage(language) {
-    return languages.includes(language);
-}
-
 function getRandomQuestion(language) {
-    if (!isValidLanguage(language)) {
-        return null;
-    }
-    
     let questionSet = getQuestionSet(language);
 
     if (!questionSet)
         return null;
 
-    return questionSet.questions[Math.floor(Math.random() * questionSet.questions.length)];
+    let index = Math.floor(Math.random() * questionSet.questions.length);
+
+    return {
+        question: questionSet.questions[index],
+        index: index
+    };
 }
 
-function isCorrectAnswer(language, question, chosenAnswer) {
-    if (!isValidLanguage(language)) {
+function isValidLanguage(language) {
+    return language >= 0 && language < languages.length;
+}
+
+function isCorrectAnswer(language, question, answer) {
+    let questionSet = getQuestionSet(language);
+
+    if (!questionSet || question > questionSet.questions.length || answer > questionSet.questions[question].answers.length)
         return false;
-    }
 
-    let correct = false;
-    let selectedQuestion;
-
-    getQuestionSet(language).questions.some((q) => {
-        if (q.question === question) {
-            selectedQuestion = q;
-            return true;
-        }
-    });
-
-    return selectedQuestion.correct === chosenAnswer.toLowerCase();
+    return questionSet.questions[question].correct === answer;
 }
 
 function getQuestionSet(language) {
-    let questionSet;
-    questionBank.languageQuestionSets.some((set) => {
-        if (set.language === language) {
-            questionSet = set;
-            return true;
-        }
-    });
-
-    return questionSet;
+    return questionBank.languageQuestionSets[language];
 }

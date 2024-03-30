@@ -11,7 +11,7 @@
                         "Berlin",
                         "Madrid"
                     ],
-                    "correct": "paris"
+                    "correct": 0
                 }   
             ]
         },
@@ -26,7 +26,7 @@
                         "Berlin",
                         "Madrid"
                     ],
-                    "correct": "madrid"
+                    "correct": 3
                 }
             ]
         },
@@ -41,7 +41,7 @@
                         "Berlin",
                         "Madrid"
                     ],
-                    "correct": "madrid"
+                    "correct": 3
                 }
             ]
         }

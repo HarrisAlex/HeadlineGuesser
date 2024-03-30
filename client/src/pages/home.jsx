@@ -10,6 +10,7 @@ export default function Home() {
     const context = useContext(LanguageContext);
     const [previousContext, setPreviousContext] = useState(context);
     const [question, setQuestion] = useState("");
+    const [questionIndex, setQuestionIndex] = useState(0);
     const [choices, setChoices] = useState([]);
     const [mode, setMode] = useState("question");
     const [choiceCorrect, setChoiceCorrect] = useState(false);
@@ -26,25 +27,26 @@ export default function Home() {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ language: localStorage.getItem("language") })
+                body: JSON.stringify({ language: context.languageIndex })
             }).then((data) => {
                 // Check for successful response
                 if (data.status === 200) {
                     // Switch to question mode
                     data.json().then((dataJson) => {
                         // Set current question
-                        setQuestion(dataJson.question);
+                        setQuestion(dataJson.questionString);
+                        setQuestionIndex(dataJson.question);
                         setChoices(dataJson.choices);
                     });
                 }
             });
         }   
-    }, [mode]);
+    }, [mode, context]);
     
     if (mode === "question") {
         return (
             <LanguageContext.Consumer>
-                {({ language }) => (
+                {({ language, languageIndex }) => (
                     <div style={{
                         display: "flex",
                         flexDirection: "column",
@@ -63,7 +65,7 @@ export default function Home() {
                         }}>
                             {choices.map((choice, index) =>  (
                                 <Button key={index} label={choice} onClick={() => {
-                                    checkAnswer(language, question, choice, (correct) => {
+                                    checkAnswer(languageIndex, questionIndex, index, (correct) => {
                                         setMode("answer");
                                         setChoiceCorrect(correct);
                                     });
@@ -100,7 +102,7 @@ export default function Home() {
     }
 }
 
-function checkAnswer(language, question, choice, callback) {
+function checkAnswer(language, questionIndex, choice, callback) {
     fetch("/api/answer", {
         method: "POST",
         headers: {
@@ -108,7 +110,7 @@ function checkAnswer(language, question, choice, callback) {
         },
         body: JSON.stringify({
             language: language,
-            question: question,
+            question: questionIndex,
             answer: choice
         })
     })
