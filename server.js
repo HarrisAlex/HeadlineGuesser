@@ -5,6 +5,10 @@ const port = 3100;
 const questionBank = require("./questionBank.json");
 const languages = require("./languages.json").languages;
 
+// Database
+const db = require('./database.js');
+const { ok } = require('assert');
+
 app.use(express.json());
 
 app.listen(port, () => {
@@ -55,7 +59,36 @@ app.post("/api/signup", (req, res) => {
         return res.status(400).json({ message: "Invalid username or password" });
     }
 
-    return res.status(200).json({ message: "Signup successful!" });
+    const data = sanitizeData({ username, pass});
+
+    const sql = "CALL insert_user_login(?, ?)";
+    const params = [data.username, data.pass];
+
+    db.query(sql, params, function(err, result) {
+        if (err) {
+            return res.status(400).json({message: `SQL database error ${err}`});
+        }
+
+        const response = result[0][0];
+
+        if (response.RESPONSE_STATUS === "ERROR") {
+            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        }
+
+        return res.status(200).json({ message: "Signup successful!" });
+    });
+});
+
+app.post("/api/users", (req, res) => {
+    const sql = "SELECT * FROM USER_LOGIN";
+
+    db.query(sql, function(err, result) {
+        if (err) {
+            return res.status(400).json({ message: `SQL database error ${err}` });
+        }
+
+        return res.status(200).json({ message: "success", users: result });
+    });
 });
 
 // +==================================+
@@ -112,6 +145,29 @@ app.post("/api/leaderboard", (req, res) => {
         { username: "user5", score: 60 },
     ] });
 });
+
+function sanitizeData(data) {
+    if (typeof(data) === "string") {
+        return data
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;")
+            .replace(/'/g, "&''");
+    } else if (Array.isArray(data)) {
+        return data.map((item) => sanitizeData(item));
+    } else if (typeof(data) === "object" && data != null) {
+        const sanitizedObject = {};
+        for (const key in data) {
+            sanitizedObject[key] = sanitizeData(data[key]);
+        }
+
+        return sanitizedObject;
+    }
+
+    return data;
+}
 
 function getRandomQuestion(language) {
     let questionSet = getQuestionSet(language);
