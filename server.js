@@ -24,7 +24,7 @@ app.get("/", (req, res) => {
 // +==================================+
 // Incoming: { }
 // Outgoing: { status, langauge }
-app.post("/api/languages", (req, res) => {
+app.get("/api/languages", (req, res) => {
     return res.status(200).json({ languages: [
         { language: "english", display: "English" },
         { language: "spanish", display: "Español" },
@@ -38,13 +38,30 @@ app.post("/api/languages", (req, res) => {
 // Incoming: { username, pass }
 // Outgoing: { status, message }
 app.post("/api/login", (req, res) => {
-    const { username, pass } = req.body;
+    const { email, pass } = req.body;
 
-    if (!username || !pass) {
+    if (!email || !pass) {
         return res.status(400).json({ message: "Invalid username or password" });
     }
 
-    return res.status(200).json({ message: "Login successful!" });
+    const data = sanitizeData({ email, pass });
+
+    const sql = "CALL validate_user(?, ?)";
+    const params = [data.email, data.pass];
+
+    db.query(sql, params, function(err, result) {
+        if (err) {
+            return res.status(400).json({ message: `SQL database error ${err}` });
+        }
+
+        const response = result[0][0];
+
+        if (response.RESPONSE_STATUS === "ERROR") {
+            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        }
+
+        return res.status(200).json({ message: "Login successful!" });
+    }); 
 });
 
 // +==================================+
@@ -53,16 +70,16 @@ app.post("/api/login", (req, res) => {
 // Incoming: { username, pass }
 // Outgoing: { status, message }
 app.post("/api/signup", (req, res) => {
-    const { username, pass } = req.body;
+    const { email, username, pass } = req.body;
 
-    if (!username || !pass) {
+    if (!email || !username || !pass) {
         return res.status(400).json({ message: "Invalid username or password" });
     }
 
-    const data = sanitizeData({ username, pass});
+    const data = sanitizeData({ email, username, pass});
 
-    const sql = "CALL insert_user_login(?, ?)";
-    const params = [data.username, data.pass];
+    const sql = "CALL insert_user_login(?, ?, ?)";
+    const params = [data.email, data.username, data.pass];
 
     db.query(sql, params, function(err, result) {
         if (err) {
@@ -79,7 +96,7 @@ app.post("/api/signup", (req, res) => {
     });
 });
 
-app.post("/api/users", (req, res) => {
+app.get("/api/users", (req, res) => {
     const sql = "SELECT * FROM USER_LOGIN";
 
     db.query(sql, function(err, result) {
@@ -96,7 +113,7 @@ app.post("/api/users", (req, res) => {
 // +==================================+
 // Incoming: { language }
 // Outgoing: { status, question, question index, answer choices }
-app.post("/api/question", (req, res) => {
+app.get("/api/question", (req, res) => {
     const { language } = req.body;
 
     if (!isValidLanguage(language)) {
@@ -117,7 +134,7 @@ app.post("/api/question", (req, res) => {
 // +==================================+
 // Incoming: { language, question, answer }
 // Outgoing: { status, correct }
-app.post("/api/answer", (req, res) => {
+app.get("/api/answer", (req, res) => {
     const { language, question, answer } = req.body;
 
     if (!isValidLanguage(language)) {
@@ -136,7 +153,7 @@ app.post("/api/answer", (req, res) => {
 // +==================================+
 // Incoming: { }
 // Outgoing: { status, leaderboard }
-app.post("/api/leaderboard", (req, res) => {
+app.get("/api/leaderboard", (req, res) => {
     return res.status(200).json({ leaderboard: [
         { username: "user1", score: 100 },
         { username: "user2", score: 90 },
