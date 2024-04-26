@@ -16,7 +16,7 @@ export default class Leaderboard extends React.Component {
     retrieveLeaderboard() {
         // Retrieve leaderboard from backend
         fetch("/api/leaderboard", {
-            method: "POST",
+            method: "GET",
             headers: {
                 "Content-Type": "application/json"
             },

@@ -22,7 +22,7 @@ export default class LanguageSelector extends React.Component {
 
     componentDidMount() {
         fetch("/api/languages", {
-            method: "POST",
+            method: "GET",
             headers: {
                 "Content-Type": "application/json"
             },
