@@ -56,6 +56,8 @@ app.post("/api/login", (req, res) => {
 
         const response = result[0][0];
 
+        console.log(response);
+
         if (response.RESPONSE_STATUS === "ERROR") {
             return res.status(400).json({ message: response.RESPONSE_MESSAGE });
         }

@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Strings from '../constants/Strings.jsx';
+import Colors from '../constants/Colors.jsx';
 import TextBox from '../components/textBox.jsx';
 import Button from '../components/button.jsx';
 import { LanguageContext } from '../contexts/LanguageContext.js';
@@ -9,7 +10,7 @@ export default class Login extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            username: "",
+            email: "",
             password: ""
         };
 
@@ -37,7 +38,7 @@ export default class Login extends React.Component {
             },
             // Send username and password to backend
             body: JSON.stringify({
-                username: this.state.username,
+                email: this.state.email,
                 pass: this.state.password
             })
         }).then((data) => {
@@ -62,16 +63,32 @@ export default class Login extends React.Component {
                     <div style={{
                         textAlign: "center"
                     }}>
-                        <h1>Welcome to the Login Page</h1>
                         <form onSubmit={this.handleSubmit} style={{
                             display: "flex",  
                             flexDirection: "column",
                             justifyContent: "center",
                             alignItems: "center",
                             gap: "1.5rem",
+                            width: "30vw",
+                            marginLeft: "auto",
+                            marginRight: "auto",
+                            borderColor: Colors.Text(),
+                            borderRadius: "2rem",
+                            borderWidth: "2px",
+                            borderStyle: "solid",
+                            padding: "2rem"
                         }}>
-                            <TextBox name="username" label={Strings.Username(language)} type="text" required onChange={this.handleInputChange} />
-                            <TextBox name="password" label={Strings.Password(language)} type="password" required onChange={this.handleInputChange}/>
+                            <p style={{
+                                fontSize: "1.5rem",
+                                transform: "translateY(calc(-1.5rem - 90%))",
+                                paddingLeft: "1rem",
+                                paddingRight: "1rem",
+                                backgroundColor: Colors.Background(),
+                                width: "fit-content",
+                                alignSelf: "flex-start",
+                            }}>{Strings.Login(language)}</p>
+                            <TextBox name="email" label={Strings.Email(language)} type="text" autoComplete="email" required onChange={this.handleInputChange} />
+                            <TextBox name="password" label={Strings.Password(language)} type="password" autoComplete="current-password" required onChange={this.handleInputChange}/>
                             <Button label={Strings.Login(language)} />
                         </form>
                     </div>

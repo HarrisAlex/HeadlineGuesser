@@ -11,6 +11,19 @@ export default class Strings {
                 return "Home";
         }
     }
+
+    static Email(language) {
+        switch (language) {
+            case "english":
+                return "Email";
+            case "spanish":
+                return "Correo Electrónico";
+            case "french":
+                return "Courriel";
+            default:
+                return "Email";
+        }
+    }
     
     static Username(language) {
         switch (language) {

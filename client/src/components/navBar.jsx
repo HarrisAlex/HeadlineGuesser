@@ -27,7 +27,8 @@ export default class NavBar extends React.Component {
                         justifyContent: "center",
                         alignItems: "center",
                         gap: "4rem",
-                        height: "4rem"
+                        height: "4rem",
+                        marginBottom: "2rem",
                     }}>
                         <p style={{fontSize: "1.65rem"}}>Headline Guesser</p>
                         <NavLink href={"index"} destination={Strings.Home(language)} active={this.state.activePage === "index" ? "true" : "false"} />

@@ -71,8 +71,9 @@ CREATE PROCEDURE validate_user(IN input_email VARCHAR(255), IN input_pass VARCHA
 BEGIN
     DECLARE isValid INT DEFAULT 0;
     DECLARE userID INT;
-    DECLARE salt INT;
+    DECLARE userSalt VARCHAR(255);
     DECLARE tokenID CHAR(255);
+    DECLARE hashsedPass VARCHAR(255);
 
     -- Create token id
     SET tokenID = UUID();
@@ -90,11 +91,11 @@ BEGIN
         INSERT INTO RESPONSE VALUES ('ERROR', 'invalid user login');
     ELSE
         -- Get user id and salt
-        SELECT ID INTO userID FROM USER_LOGIN WHERE EMAIL = input_email;
-        SELECT SALT INTO salt FROM USER_LOGIN WHERE ID = userID;
+        SELECT ID, SALT INTO userID, userSalt FROM USER_LOGIN WHERE EMAIL = input_email;
+        SET hashsedPass = SHA2(CONCAT(input_pass, userSalt), 256);
 
         -- Check if password is valid
-        IF SHA2(CONCAT(input_pass, salt), 256) != (SELECT PASS FROM USER_LOGIN WHERE ID = userID) THEN
+        IF hashsedPass != (SELECT PASS FROM USER_LOGIN WHERE ID = userID) THEN
             INSERT INTO RESPONSE VALUES ('ERROR', 'invalid user login');
         ELSE
             -- Insert token
