@@ -17,7 +17,7 @@ export default class Colors {
                 case 2:
                     return "#FB5607";
                 case 3:
-                    return "#FF006E";
+                    return "#FF4D9A";
                 case 4:
                     return "#8338EC";
                 case 5:

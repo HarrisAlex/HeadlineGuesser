@@ -56,6 +56,7 @@ export default class LanguageSelector extends React.Component {
                             pointerEvents: this.state.open ? "all" : "none",
                             alignItems: "center",
                             flexDirection: "column",
+                            zIndex: "2"
                         }}>
                             <div
                                 style={{

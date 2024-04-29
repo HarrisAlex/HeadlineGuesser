@@ -45,7 +45,7 @@ export default class TextBox extends React.Component {
                 }}>{this.props.label}</label>
                 <input onFocus={this.handleFocus} onBlur={this.handleBlur} id={this.props.label} style={{
                     position: "relative",
-                    color: Colors.Text(),
+                    color: color,
                     backgroundColor: Colors.Background(),
                     borderStyle: "solid",
                     borderWidth: "1px",
