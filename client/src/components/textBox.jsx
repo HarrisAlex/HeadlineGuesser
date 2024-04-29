@@ -44,9 +44,9 @@ export default class TextBox extends React.Component {
 
                 }}>{this.props.label}</label>
                 <input onFocus={this.handleFocus} onBlur={this.handleBlur} id={this.props.label} style={{
-                    background: "none",
                     position: "relative",
                     color: Colors.Text(),
+                    backgroundColor: Colors.Background(),
                     borderStyle: "solid",
                     borderWidth: "1px",
                     borderColor: color,
@@ -57,7 +57,10 @@ export default class TextBox extends React.Component {
                     width: "100%",
                     transition: "all 0.25s ease",
                     boxShadow: this.state.focused ? "0 0 8px 0" + Colors.Accent(3) : "",
-                }}{...this.props}></input>
+                    "--autofill-bg": Colors.Background(),
+                    "--autofill-text": color,
+                }}
+                {...this.props}></input>
             </div>
         );
     }
