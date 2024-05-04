@@ -11,7 +11,8 @@ export default class Login extends React.Component {
         super(props);
         this.state = {
             email: "",
-            password: ""
+            password: "",
+            error: ""
         };
 
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -45,12 +46,12 @@ export default class Login extends React.Component {
             // Check for successful response
             if (data.status === 200) {
                 data.json().then((data) => {
-                    console.log(data);
+                    localStorage.setItem("token", data.token);
                 });
             }
             else {
                 data.json().then((data) => {
-                    console.log(data.error);
+                    this.setState({ error: data.message });
                 });
             }
         });
@@ -90,6 +91,9 @@ export default class Login extends React.Component {
                             <TextBox name="email" label={Strings.Email(language)} type="text" autoComplete="email" required onChange={this.handleInputChange} />
                             <TextBox name="password" label={Strings.Password(language)} type="password" autoComplete="current-password" required onChange={this.handleInputChange}/>
                             <Button label={Strings.Login(language)} />
+                            <p style={{
+                                color: "red"
+                            }}>{this.state.error}</p>
                         </form>
                     </div>
                 )}

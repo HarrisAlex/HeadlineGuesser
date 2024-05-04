@@ -12,7 +12,8 @@ export default class Signup extends React.Component {
         this.state = {
             email: "",
             username: "",
-            password: ""
+            password: "",
+            error: ""
         };
 
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -47,12 +48,13 @@ export default class Signup extends React.Component {
             // Check for successful response
             if (data.status === 200) {
                 data.json().then((data) => {
-                    console.log(data);
+                    localStorage.setItem("token", data.token);
+                    window.location.href = "/index";
                 });
             }
             else {
                 data.json().then((data) => {
-                    console.log(data.error);
+                    this.setState({ error: data.message });
                 });
             }
         });
