@@ -48,16 +48,16 @@ BEGIN
 
     -- Check if email already exists and password is valid
     IF emailExists > 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'Email already exists');
+        INSERT INTO RESPONSE VALUES ('ERROR', 'EMAIL_EXISTS');
     ELSEIF passLength < 8 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'Password must be at least 8 characters');
+        INSERT INTO RESPONSE VALUES ('ERROR', 'PASSWORD_LENGTH_ERROR');
     ELSE
         -- Generate salt
         SET salt = HEX(RANDOM_BYTES(64));
 
         -- Insert user
         INSERT INTO USER_LOGIN (EMAIL, USERNAME, PASS, SALT) VALUES (input_email, input_username, SHA2(CONCAT(input_pass, salt), 256), salt);
-        INSERT INTO RESPONSE VALUES ('SUCCESS', 'User created');
+        INSERT INTO RESPONSE VALUES ('SUCCESS', 'USER_CREATED');
     END IF;
 
     SELECT * FROM RESPONSE;
@@ -88,7 +88,7 @@ BEGIN
     SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE EMAIL = input_email;
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'invalid user login');
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER');
     ELSE
         -- Get user id and salt
         SELECT ID, SALT INTO userID, userSalt FROM USER_LOGIN WHERE EMAIL = input_email;
@@ -96,7 +96,7 @@ BEGIN
 
         -- Check if password is valid
         IF hashsedPass != (SELECT PASS FROM USER_LOGIN WHERE ID = userID) THEN
-            INSERT INTO RESPONSE VALUES ('ERROR', 'invalid user login');
+            INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER');
         ELSE
             -- Insert token
             INSERT INTO TOKEN_TABLE (TOKEN, EXPIRATION_DATE, ID) VALUES (tokenID, DATE_ADD(NOW(), INTERVAL 1 DAY), userID);
@@ -132,9 +132,9 @@ BEGIN
     SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'invalid token');
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
     ELSE 
-        INSERT INTO RESPONSE VALUES ('SUCCESS', 'valid token');
+        INSERT INTO RESPONSE VALUES ('SUCCESS', 'VALID_TOKEN');
     END IF;
 
     SELECT * FROM RESPONSE;
