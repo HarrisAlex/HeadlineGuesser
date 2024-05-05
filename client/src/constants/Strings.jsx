@@ -1,12 +1,11 @@
 export default class Strings {
     static Home(language) {
         switch (language) {
-            case "english":
-                return "Home";
             case "spanish":
                 return "Inicio";
             case "french":
                 return "Accueil";
+            case "english":
             default:
                 return "Home";
         }
@@ -14,12 +13,11 @@ export default class Strings {
 
     static Email(language) {
         switch (language) {
-            case "english":
-                return "Email";
             case "spanish":
                 return "Correo Electrónico";
             case "french":
                 return "Courriel";
+            case "english":
             default:
                 return "Email";
         }
@@ -27,12 +25,11 @@ export default class Strings {
     
     static Username(language) {
         switch (language) {
-            case "english":
-                return "Username";
             case "spanish":
                 return "Nombre de Usuario";
             case "french":
                 return "Nom d'Utilisateur";
+            case "english":
             default:
                 return "Username";
         }
@@ -40,12 +37,11 @@ export default class Strings {
 
     static Password(language) {
         switch (language) {
-            case "english":
-                return "Password";
             case "spanish":
                 return "Contraseña";
             case "french":
                 return "Mot de Passe";
+            case "english":
             default:
                 return "Password";
         }
@@ -53,12 +49,11 @@ export default class Strings {
 
     static Login(language) {
         switch (language) {
-            case "english":
-                return "Login";
             case "spanish":
                 return "Acceso";
             case "french":
                 return "Se cibbecter";
+            case "english":
             default:
                 return "Login";
         }
@@ -66,12 +61,11 @@ export default class Strings {
 
     static Signup(language) {
         switch (language) {
-            case "english":
-                return "Signup";
             case "spanish":
                 return "Registrarse";
             case "french":
                 return "S'inscrire";
+            case "english":
             default:
                 return "Signup";
         }
@@ -79,12 +73,11 @@ export default class Strings {
 
     static NextQuestion(language) {
         switch (language) {
-            case "english":
-                return "Next Question";
             case "spanish":
                 return "Siguiente Pregunta";
             case "french":
                 return "Question Suivante";
+            case "english":
             default:
                 return "Next Question";
         }
@@ -92,12 +85,11 @@ export default class Strings {
 
     static Correct(language) {
         switch (language) {
-            case "english":
-                return "Correct!";
             case "spanish":
                 return "¡Correcto!";
             case "french":
                 return "Correct!";
+            case "english":
             default:
                 return "Correct!";
         }
@@ -105,12 +97,11 @@ export default class Strings {
 
     static Incorrect(language) {
         switch (language) {
-            case "english":
-                return "Incorrect!";
             case "spanish":
                 return "¡Incorrecto!";
             case "french":
                 return "Incorrect!";
+            case "english":
             default:
                 return "Incorrect!";
         }
@@ -118,12 +109,11 @@ export default class Strings {
 
     static Leaderboard(language) {
         switch (language) {
-            case "english":
-                return "Leaderboard";
             case "spanish":
                 return "Tabla de Clasificación";
             case "french":
                 return "Classement";
+            case "english":
             default:
                 return "Leaderboard";
         }
@@ -131,14 +121,60 @@ export default class Strings {
 
     static ChooseLanguage(language) {
         switch (language) {
-            case "english":
-                return "Choose your Language";
             case "spanish":
                 return "Elige tu Idioma";
             case "french":
                 return "Choisissez votre Langue";
+            case "english":
             default:
                 return "Choose your Language";
+        }
+    }
+
+    static UserBackendResponse(response, language) {
+        switch (response) {
+            case "EMAIL_EXISTS":
+                switch (language) {
+                    case "spanish":
+                        return "El correo electrónico ya existe";
+                    case "french":
+                        return "L'email existe déjà";
+                    case "english":
+                    default:
+                        return "Email already exists";
+                }
+            case "PASSWORD_LENGTH_ERROR":
+                switch (language) {
+                    case "spanish":
+                        return "La contraseña debe tener al menos 8 caracteres";
+                    case "french":
+                        return "Le mot de passe doit contenir au moins 8 caractères";
+                    case "english":
+                    default:
+                        return "Password must be at least 8 characters";
+                }
+            case "USER_CREATED":
+                switch (language) {
+                    case "spanish":
+                        return "Usuario creado";
+                    case "french":
+                        return "Utilisateur créé";
+                    case "english":
+                    default:
+                        return "User created";
+                }
+            case "INVALID_USER":
+                switch (language) {
+                    case "spanish":
+                        return "Combinación de correo electrónico y contraseña no válida";
+                    case "french":
+                        return "Combinaison e-mail et mot de passe invalide";
+                    case "english":
+                    default:
+                        return "Invalid email and password combination";
+                }
+            default:
+                return response;
         }
     }
 

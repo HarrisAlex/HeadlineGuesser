@@ -51,7 +51,8 @@ export default class Login extends React.Component {
             }
             else {
                 data.json().then((data) => {
-                    this.setState({ error: data.message });
+                    const message = Strings.UserBackendResponse(data.message, localStorage.getItem("language"));
+                    this.setState({ error: message });
                 });
             }
         });
@@ -90,10 +91,10 @@ export default class Login extends React.Component {
                             }}>{Strings.Login(language)}</p>
                             <TextBox name="email" label={Strings.Email(language)} type="text" autoComplete="email" required onChange={this.handleInputChange} />
                             <TextBox name="password" label={Strings.Password(language)} type="password" autoComplete="current-password" required onChange={this.handleInputChange}/>
-                            <Button label={Strings.Login(language)} />
                             <p style={{
                                 color: "red"
                             }}>{this.state.error}</p>
+                            <Button label={Strings.Login(language)} />
                         </form>
                     </div>
                 )}
