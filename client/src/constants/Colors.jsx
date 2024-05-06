@@ -5,6 +5,10 @@ export default class Colors {
         return dark ? "#1F1F1F" : "#E8E8E8";
     }
 
+    static OffsetBackground() {
+        return dark ? "#2A2A2A" : "#D8D8D8";
+    }
+
     static Text() {
         return dark ? "#E8E8E8" : "#1F1F1F";
     }

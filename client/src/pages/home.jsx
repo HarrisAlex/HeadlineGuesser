@@ -53,7 +53,7 @@ export default function Home() {
                         justifyContent: "center",
                         alignItems: "center",
                         gap: "2rem",
-                        height: "calc(100svh - 4rem)"
+                        height: "calc(100svh - 6rem)"
                     }}>
                         <p style={{
                             fontSize: "2rem"
@@ -86,7 +86,7 @@ export default function Home() {
                         justifyContent: "center",
                         alignItems: "center",
                         gap: "2rem",
-                        height: "calc(100svh - 4rem)"
+                        height: "calc(100svh - 6rem)"
                     }}>
                         <p style={{
                             fontSize: "2rem"

@@ -178,6 +178,30 @@ export default class Strings {
         }
     }
 
+    static Score(language) {
+        switch (language) {
+            case "spanish":
+                return "Puntuación";
+            case "french":
+                return "Score";
+            case "english":
+            default:
+                return "Score";
+        }
+    }
+
+    static Rank(language) {
+        switch (language) {
+            case "spanish":
+                return "Rango";
+            case "french":
+                return "Rang";
+            case "english":
+            default:
+                return "Rank";
+        }
+    }
+
     static English() {
         return "English";
     }
