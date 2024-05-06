@@ -167,6 +167,38 @@ app.get("/api/leaderboard", (req, res) => {
     });
 });
 
+// +==================================+
+// |            Score API             |
+// +==================================+
+// Incoming: { }
+// Outgoing: { status, leaderboard }
+app.post("/api/update_score", (req, res) => {
+    const { token, score } = req.body;
+
+    if (!token || !score) {
+        return res.status(400).json({ message: "Invalid token or score" });
+    }
+
+    const data = sanitizeData({ token, score });
+
+    const sql = "CALL update_score(?, ?)";
+    const params = [data.token, data.score];
+
+    db.query(sql, params, function(err, result) {
+        if (err) {
+            return res.status(400).json({ message: `SQL database error ${err}` });
+        }
+
+        const response = result[0][0];
+
+        if (response.RESPONSE_STATUS === "ERROR") {
+            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        }
+
+        return res.status(200).json({ message: response.RESPONSE_MESSAGE });
+    });
+});
+
 function sanitizeData(data) {
     if (typeof(data) === "string") {
         return data

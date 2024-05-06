@@ -122,6 +122,39 @@ END //
 DELIMITER ;
 
 DELIMITER //
+-- UPDATE SCORE
+CREATE PROCEDURE update_score(IN input_token CHAR(255), IN input_score INT)
+BEGIN
+    DECLARE isValid INT DEFAULT 0;
+    DECLARE userScore INT;
+    DECLARE userID INT;
+
+    -- Create response table
+    CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
+        RESPONSE_STATUS VARCHAR(20),
+        RESPONSE_MESSAGE VARCHAR(255)
+    );
+
+    -- Check if token is valid
+    SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
+
+    IF isValid = 0 THEN
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
+    ELSE
+        -- Get user id
+        SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
+        SELECT SCORE INTO userScore FROM SCORES WHERE ID = userID;
+        -- Update score
+        UPDATE SCORES SET SCORE = (userScore + input_score) WHERE ID = userID;
+        INSERT INTO RESPONSE VALUES ('SUCCESS', 'SCORE_UPDATED');
+    END IF;
+
+    SELECT * FROM RESPONSE;
+    DROP TEMPORARY TABLE RESPONSE;
+END //
+DELIMITER ;
+
+DELIMITER //
 -- GET LEADERBOARD
 CREATE PROCEDURE get_leaderboard()
 BEGIN
