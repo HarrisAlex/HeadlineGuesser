@@ -156,13 +156,15 @@ app.get("/api/answer", (req, res) => {
 // Incoming: { }
 // Outgoing: { status, leaderboard }
 app.get("/api/leaderboard", (req, res) => {
-    return res.status(200).json({ leaderboard: [
-        { username: "user1", score: 100 },
-        { username: "user2", score: 90 },
-        { username: "user3", score: 80 },
-        { username: "user4", score: 70 },
-        { username: "user5", score: 60 },
-    ] });
+    const sql = "CALL get_leaderboard()";
+
+    db.query(sql, function(err, result) {
+        if (err) {
+            return res.status(400).json({ message: `SQL database error ${err}` });
+        }
+
+        return res.status(200).json({ leaderboard: result[0] });
+    });
 });
 
 function sanitizeData(data) {

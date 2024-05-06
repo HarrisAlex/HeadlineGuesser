@@ -16,11 +16,22 @@ CREATE TABLE USER_LOGIN (
     SALT VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE SCORES (
+    SCORE INT NOT NULL,
+    ID INT NOT NULL,
+    FOREIGN KEY (ID) REFERENCES USER_LOGIN(ID)
+);
+
 CREATE TABLE TOKEN_TABLE (
     TOKEN CHAR(255) NOT NULL,
     EXPIRATION_DATE TIMESTAMP NOT NULL,
     ID INT NOT NULL,
     FOREIGN KEY (ID) REFERENCES USER_LOGIN(ID)
+);
+
+CREATE TABLE LEADERBOARD (
+    USERNAME VARCHAR(255) NOT NULL,
+    SCORE INT NOT NULL
 );
 
 CREATE USER 'dev'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
@@ -57,6 +68,7 @@ BEGIN
 
         -- Insert user
         INSERT INTO USER_LOGIN (EMAIL, USERNAME, PASS, SALT) VALUES (input_email, input_username, SHA2(CONCAT(input_pass, salt), 256), salt);
+        INSERT INTO SCORES (SCORE, ID) VALUES (0, (SELECT ID FROM USER_LOGIN WHERE EMAIL = input_email));
         INSERT INTO RESPONSE VALUES ('SUCCESS', 'USER_CREATED');
     END IF;
 
@@ -110,6 +122,28 @@ END //
 DELIMITER ;
 
 DELIMITER //
+-- GET LEADERBOARD
+CREATE PROCEDURE get_leaderboard()
+BEGIN
+    -- Get leaderboard
+    SELECT * FROM LEADERBOARD;
+END //
+DELIMITER ;
+
+DELIMITER //
+-- UPDATE LEADERBOARD
+CREATE PROCEDURE update_leaderboard()
+BEGIN
+    -- Clear leaderboard
+    TRUNCATE TABLE LEADERBOARD;
+    -- Insert top 50 users into leaderboard
+    INSERT INTO LEADERBOARD (USERNAME, SCORE) SELECT USERNAME, s.SCORE FROM USER_LOGIN u 
+        INNER JOIN SCORES s ON u.ID = s.ID 
+        ORDER BY s.SCORE DESC LIMIT 50;
+END //
+DELIMITER ;
+
+DELIMITER //
 -- DELETE OLD TOKENS
 CREATE PROCEDURE delete_old_tokens()
 BEGIN
@@ -142,9 +176,14 @@ BEGIN
 END //
 DELIMITER ;
 
-CREATE EVENT IF NOT EXISTS delete_old_token_event
-
 -- Delete old tokens every 12 hours
+CREATE EVENT IF NOT EXISTS delete_old_token_event
 ON SCHEDULE EVERY 12 HOUR
 DO 
     CALL delete_old_tokens;
+
+-- Update leaderboard every 1 minute
+CREATE EVENT IF NOT EXISTS update_leaderboard_event
+ON SCHEDULE EVERY 1 MINUTE
+DO
+    CALL update_leaderboard;
