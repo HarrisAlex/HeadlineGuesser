@@ -23,7 +23,7 @@ export default function Home() {
     useEffect(() => {
         if (mode === "question") {            
             fetch("/api/question", {
-                method: "GET",
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
@@ -104,7 +104,7 @@ export default function Home() {
 
 function checkAnswer(language, questionIndex, choice, callback) {
     fetch("/api/answer", {
-        method: "GET",
+        method: "POST",
         headers: {
             "Content-Type": "application/json"
         },

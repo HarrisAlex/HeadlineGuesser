@@ -115,7 +115,7 @@ app.get("/api/users", (req, res) => {
 // +==================================+
 // Incoming: { language }
 // Outgoing: { status, question, question index, answer choices }
-app.get("/api/question", (req, res) => {
+app.post("/api/question", (req, res) => {
     const { language } = req.body;
 
     if (!isValidLanguage(language)) {
@@ -136,7 +136,7 @@ app.get("/api/question", (req, res) => {
 // +==================================+
 // Incoming: { language, question, answer }
 // Outgoing: { status, correct }
-app.get("/api/answer", (req, res) => {
+app.post("/api/answer", (req, res) => {
     const { language, question, answer } = req.body;
 
     if (!isValidLanguage(language)) {
