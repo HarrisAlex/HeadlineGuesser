@@ -10,6 +10,7 @@ import Home from './pages/home.jsx';
 import Login from './pages/login.jsx';
 import Signup from './pages/signup.jsx';
 import Leaderboard from './pages/leaderboard.jsx';
+import Profile from './pages/profile.jsx';
 import NavBar from './components/navBar.jsx';
 import DarkModeToggle from './components/darkModeToggle.jsx';
 import LanguageSelector from './components/languageSelector.jsx';
@@ -58,6 +59,7 @@ export default class App extends React.Component {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
+                <Route path="/profile" element={<Profile />} />
             </Routes>
             </Router>
             <DarkModeToggle onClick={this.handleDarkModeToggle} />
