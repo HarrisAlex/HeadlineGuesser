@@ -171,7 +171,7 @@ app.get("/api/leaderboard", (req, res) => {
 // |            Score API             |
 // +==================================+
 // Incoming: { }
-// Outgoing: { status, leaderboard }
+// Outgoing: { status, score }
 app.post("/api/update_score", (req, res) => {
     const { token, score } = req.body;
 
@@ -196,6 +196,62 @@ app.post("/api/update_score", (req, res) => {
         }
 
         return res.status(200).json({ message: response.RESPONSE_MESSAGE });
+    });
+});
+
+// +==================================+
+// |          Get User API            |
+// +==================================+
+// Incoming: { }
+// Outgoing: { status, username, dateJoined, score, friends }
+app.post("/api/get_user", (req, res) => {
+    const { token } = req.body;
+
+    let id = req.query.user;
+    
+    const sql = "CALL get_user(?, ?)";
+    const params = [token, id];
+
+    db.query(sql, params, function(err, result) {
+        if (err) {
+            return res.status(400).json({ message: `SQL database error ${err}` });
+        }
+
+        const response = result[0][0];
+
+        if (response.RESPONSE_STATUS === "ERROR") {
+            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        }
+
+        return res.status(200).json({ username: response.USERNAME, dateJoined: response.DATE_JOINED, score: response.SCORE, friends: response.FRIENDS });
+    });
+});
+
+// +==================================+
+// |         Get Friends API          |
+// +==================================+
+// Incoming: { }
+// Outgoing: { status, username, dateJoined, score, friends }
+app.post("/api/get_friends", (req, res) => {
+    const { token } = req.body;
+
+    let id = req.query.user;
+    
+    const sql = "CALL get_friends(?, ?)";
+    const params = [token, id];
+
+    db.query(sql, params, function(err, result) {
+        if (err) {
+            return res.status(400).json({ message: `SQL database error ${err}` });
+        }
+
+        const response = result[0][0];
+
+        if (response.RESPONSE_STATUS === "ERROR") {
+            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        }
+
+        return res.status(200).json({ friends: response.FRIENDS });
     });
 });
 

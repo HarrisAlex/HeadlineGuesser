@@ -17,21 +17,34 @@ CREATE TABLE USER_LOGIN (
 );
 
 CREATE TABLE SCORES (
+    ID INT NOT NULL PRIMARY KEY,
     SCORE INT NOT NULL,
-    ID INT NOT NULL,
     FOREIGN KEY (ID) REFERENCES USER_LOGIN(ID)
 );
 
 CREATE TABLE TOKEN_TABLE (
+    ID INT NOT NULL PRIMARY KEY,
     TOKEN CHAR(255) NOT NULL,
     EXPIRATION_DATE TIMESTAMP NOT NULL,
-    ID INT NOT NULL,
     FOREIGN KEY (ID) REFERENCES USER_LOGIN(ID)
 );
 
 CREATE TABLE LEADERBOARD (
-    USERNAME VARCHAR(255) NOT NULL,
+    USERNAME VARCHAR(255) NOT NULL PRIMARY KEY,
     SCORE INT NOT NULL
+);
+
+CREATE TABLE USER_INFO (
+    ID INT NOT NULL PRIMARY KEY,
+    DATEJOINED TIMESTAMP NOT NULL,
+    FOREIGN KEY (ID) REFERENCES USER_LOGIN(ID)
+);
+
+CREATE TABLE FRIENDS (
+    ID INT NOT NULL,
+    FRIEND INT NOT NULL,
+    FOREIGN KEY (ID) REFERENCES USER_LOGIN(ID),
+    FOREIGN KEY (FRIEND) REFERENCES USER_LOGIN(ID)
 );
 
 CREATE USER 'dev'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
@@ -69,6 +82,7 @@ BEGIN
         -- Insert user
         INSERT INTO USER_LOGIN (EMAIL, USERNAME, PASS, SALT) VALUES (input_email, input_username, SHA2(CONCAT(input_pass, salt), 256), salt);
         INSERT INTO SCORES (SCORE, ID) VALUES (0, (SELECT ID FROM USER_LOGIN WHERE EMAIL = input_email));
+        INSERT INTO USER_INFO (DATEJOINED, ID) VALUES (NOW(), (SELECT ID FROM USER_LOGIN WHERE EMAIL = input_email));
         INSERT INTO RESPONSE VALUES ('SUCCESS', 'USER_CREATED');
     END IF;
 
@@ -155,6 +169,103 @@ END //
 DELIMITER ;
 
 DELIMITER //
+-- GET USER
+CREATE PROCEDURE get_user(IN input_token CHAR(255), IN input_username VARCHAR(255))
+BEGIN
+    DECLARE isValid INT DEFAULT 0;
+    DECLARE userID INT;
+    DECLARE outputUsername VARCHAR(255);
+    DECLARE userScore INT;
+    DECLARE userJoinDate TIMESTAMP;
+    DECLARE userFriendCount INT;
+
+    -- Create response table
+    CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
+        RESPONSE_STATUS VARCHAR(20),
+        RESPONSE_MESSAGE VARCHAR(255),
+        USERNAME VARCHAR(255),
+        SCORE INT,
+        JOINDATE TIMESTAMP,
+        FRIENDCOUNT INT
+    );
+
+    -- Check if token is valid
+    -- SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
+
+    IF isValid = 1 THEN
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN', NULL, NULL, NULL, NULL);
+    ELSE
+        SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE USERNAME = input_username;
+
+        IF isValid = 0 THEN
+            INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER', NULL, NULL, NULL, NULL);
+        ELSE
+            -- Get user info
+            SELECT ID INTO userID FROM USER_LOGIN WHERE USERNAME = input_username;
+
+            SELECT USERNAME INTO outputUsername FROM USER_LOGIN WHERE ID = userID;
+            SELECT SCORE INTO userScore FROM SCORES WHERE ID = userID;
+            SELECT DATEJOINED INTO userJoinDate FROM USER_INFO WHERE ID = userID;
+
+            SELECT COUNT(*) INTO userFriendCount FROM FRIENDS WHERE ID = userID;
+            INSERT INTO RESPONSE VALUES ('SUCCESS', 'USER_FOUND', outputUsername, userScore, userJoinDate, userFriendCount);
+        END IF;
+    END IF;
+
+    SELECT * FROM RESPONSE;
+    DROP TEMPORARY TABLE RESPONSE;
+END //
+DELIMITER ;
+
+DELIMITER //
+-- GET FRIENDS
+CREATE PROCEDURE get_friends(IN input_token CHAR(255), IN input_username VARCHAR(255))
+BEGIN
+    DECLARE isValid INT DEFAULT 0;
+    DECLARE userID INT;
+    DECLARE friendID INT;
+    DECLARE friendUsername VARCHAR(255);
+
+    -- Create response table
+    CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
+        RESPONSE_STATUS VARCHAR(20),
+        RESPONSE_MESSAGE VARCHAR(255),
+        FRIEND_USERNAME VARCHAR(255)
+    );
+
+    -- Check if token is valid
+    -- SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
+
+    IF isValid = 1 THEN
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN', NULL);
+    ELSE
+        SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE USERNAME = input_username;
+
+        IF isValid = 0 THEN
+            INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN', NULL);
+        ELSE
+            -- Get user id
+            SELECT ID INTO userID FROM USER_LOGIN WHERE USERNAME = input_username;
+
+            -- Get friends
+            SELECT FRIEND INTO friendID FROM FRIENDS WHERE ID = userID;
+
+            WHILE friendID IS NOT NULL DO
+                SELECT USERNAME INTO friendUsername FROM USER_LOGIN WHERE ID = friendID;
+
+                INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIEND_FOUND', friendUsername);
+
+                SELECT FRIEND INTO friendID FROM FRIENDS WHERE ID = userID;
+            END WHILE;
+        END IF;
+    END IF;
+
+    SELECT * FROM RESPONSE;
+    DROP TEMPORARY TABLE RESPONSE;
+END //
+DELIMITER ;
+
+DELIMITER //
 -- GET LEADERBOARD
 CREATE PROCEDURE get_leaderboard()
 BEGIN
@@ -220,3 +331,10 @@ CREATE EVENT IF NOT EXISTS update_leaderboard_event
 ON SCHEDULE EVERY 1 MINUTE
 DO
     CALL update_leaderboard;
+
+CALL insert_user_login('apple', 'apple', 'password');
+CALL insert_user_login('banana', 'banana', 'password');
+CALL insert_user_login('cherry', 'cherry', 'password');
+
+insert into friends values (3, 2);
+insert into friends values (3, 1);

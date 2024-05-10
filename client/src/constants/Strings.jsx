@@ -202,6 +202,30 @@ export default class Strings {
         }
     }
 
+    static Friends(language) {
+        switch (language) {
+            case "spanish":
+                return "Amigos";
+            case "french":
+                return "Amis";
+            case "english":
+            default:
+                return "Friends";
+        }
+    }
+
+    static DateJoined(language) {
+        switch (language) {
+            case "spanish":
+                return "Fecha de Registro";
+            case "french":
+                return "Date d'Inscription";
+            case "english":
+            default:
+                return "Date Joined";
+        }
+    }
+
     static English() {
         return "English";
     }
