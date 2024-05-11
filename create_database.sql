@@ -177,7 +177,6 @@ BEGIN
     DECLARE outputUsername VARCHAR(255);
     DECLARE userScore INT;
     DECLARE userJoinDate TIMESTAMP;
-    DECLARE userFriendCount INT;
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
@@ -185,30 +184,29 @@ BEGIN
         RESPONSE_MESSAGE VARCHAR(255),
         USERNAME VARCHAR(255),
         SCORE INT,
-        JOINDATE TIMESTAMP,
-        FRIENDCOUNT INT
+        JOINDATE TIMESTAMP
     );
 
     -- Check if token is valid
-    -- SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
+    SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
 
-    IF isValid = 1 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN', NULL, NULL, NULL, NULL);
+    IF isValid = 0 THEN
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN', NULL, NULL, NULL);
     ELSE
         SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE USERNAME = input_username;
 
         IF isValid = 0 THEN
-            INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER', NULL, NULL, NULL, NULL);
+            INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER', NULL, NULL, NULL);
         ELSE
             -- Get user info
             SELECT ID INTO userID FROM USER_LOGIN WHERE USERNAME = input_username;
 
+            -- Get username, score, date joined, and friend count
             SELECT USERNAME INTO outputUsername FROM USER_LOGIN WHERE ID = userID;
             SELECT SCORE INTO userScore FROM SCORES WHERE ID = userID;
             SELECT DATEJOINED INTO userJoinDate FROM USER_INFO WHERE ID = userID;
 
-            SELECT COUNT(*) INTO userFriendCount FROM FRIENDS WHERE ID = userID;
-            INSERT INTO RESPONSE VALUES ('SUCCESS', 'USER_FOUND', outputUsername, userScore, userJoinDate, userFriendCount);
+            INSERT INTO RESPONSE VALUES ('SUCCESS', 'USER_FOUND', outputUsername, userScore, userJoinDate);
         END IF;
     END IF;
 
@@ -225,6 +223,9 @@ BEGIN
     DECLARE userID INT;
     DECLARE friendID INT;
     DECLARE friendUsername VARCHAR(255);
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE friendCursor CURSOR FOR SELECT FRIEND FROM FRIENDS WHERE ID = userID;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
@@ -234,29 +235,42 @@ BEGIN
     );
 
     -- Check if token is valid
-    -- SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
+    SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
 
-    IF isValid = 1 THEN
+    IF isValid = 0 THEN
         INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN', NULL);
     ELSE
         SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE USERNAME = input_username;
 
+        -- Check if user exists
         IF isValid = 0 THEN
-            INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN', NULL);
+            INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER', NULL);
         ELSE
             -- Get user id
             SELECT ID INTO userID FROM USER_LOGIN WHERE USERNAME = input_username;
 
-            -- Get friends
-            SELECT FRIEND INTO friendID FROM FRIENDS WHERE ID = userID;
+            INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIENDS_FOUND', NULL);
 
-            WHILE friendID IS NOT NULL DO
+            OPEN friendCursor;
+
+            -- Loop through all friends
+            read_loop: LOOP
+                -- Get friend id
+                FETCH friendCursor INTO friendID;
+
+                -- Exit loop if no more friends
+                IF done THEN
+                    LEAVE read_loop;
+                END IF;
+
+                -- Get friend username
                 SELECT USERNAME INTO friendUsername FROM USER_LOGIN WHERE ID = friendID;
 
+                -- Insert friend into response table
                 INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIEND_FOUND', friendUsername);
+            END LOOP;
 
-                SELECT FRIEND INTO friendID FROM FRIENDS WHERE ID = userID;
-            END WHILE;
+            CLOSE friendCursor;
         END IF;
     END IF;
 

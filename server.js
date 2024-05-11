@@ -247,11 +247,22 @@ app.post("/api/get_friends", (req, res) => {
 
         const response = result[0][0];
 
+        console.log(result);
+
         if (response.RESPONSE_STATUS === "ERROR") {
             return res.status(400).json({ message: response.RESPONSE_MESSAGE });
         }
 
-        return res.status(200).json({ friends: response.FRIENDS });
+        if (result[0].length === 1)
+            return res.status(200).json({ friends: [] });
+
+        let friendsList = [];
+
+        for (let i = 1; i < result[0].length; i++) {
+            friendsList.push(result[0][i].FRIEND_USERNAME);
+        }
+
+        return res.status(200).json({ friends: friendsList });
     });
 });
 
