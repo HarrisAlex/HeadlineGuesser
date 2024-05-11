@@ -51,7 +51,8 @@ app.post("/api/login", (req, res) => {
 
     db.query(sql, params, function(err, result) {
         if (err) {
-            return res.status(400).json({ message: `SQL database error ${err}` });
+            console.log(`SQL database error ${err}`);
+            return res.status(400).json({ message: "Server error" });
         }
 
         const response = result[0][0];
@@ -62,7 +63,7 @@ app.post("/api/login", (req, res) => {
             return res.status(400).json({ message: response.RESPONSE_MESSAGE });
         }
 
-        return res.status(200).json({ message: "Login successful!" });
+        return res.status(200).json({ message: "Login successful!", token: response.RESPONSE_MESSAGE });
     }); 
 });
 
@@ -85,7 +86,8 @@ app.post("/api/signup", (req, res) => {
 
     db.query(sql, params, function(err, result) {
         if (err) {
-            return res.status(400).json({message: `SQL database error ${err}`});
+            console.log(`SQL database error ${err}`);
+            return res.status(400).json({ message: "Server error" });
         }
 
         const response = result[0][0];
@@ -94,7 +96,7 @@ app.post("/api/signup", (req, res) => {
             return res.status(400).json({ message: response.RESPONSE_MESSAGE });
         }
 
-        return res.status(200).json({ message: "Signup successful!" });
+        return res.status(200).json({ message: "Signup successful!", token: response.RESPONSE_MESSAGE });
     });
 });
 
@@ -160,7 +162,8 @@ app.get("/api/leaderboard", (req, res) => {
 
     db.query(sql, function(err, result) {
         if (err) {
-            return res.status(400).json({ message: `SQL database error ${err}` });
+            console.log(`SQL database error ${err}`);
+            return res.status(400).json({ message: "Server error" });
         }
 
         return res.status(200).json({ leaderboard: result[0] });
@@ -186,7 +189,8 @@ app.post("/api/update_score", (req, res) => {
 
     db.query(sql, params, function(err, result) {
         if (err) {
-            return res.status(400).json({ message: `SQL database error ${err}` });
+            console.log(`SQL database error ${err}`);
+            return res.status(400).json({ message: "Server error" });
         }
 
         const response = result[0][0];
@@ -214,7 +218,8 @@ app.post("/api/get_user", (req, res) => {
 
     db.query(sql, params, function(err, result) {
         if (err) {
-            return res.status(400).json({ message: `SQL database error ${err}` });
+            console.log(`SQL database error ${err}`);
+            return res.status(400).json({ message: "Server error" });
         }
 
         const response = result[0][0];
@@ -242,7 +247,8 @@ app.post("/api/get_friends", (req, res) => {
 
     db.query(sql, params, function(err, result) {
         if (err) {
-            return res.status(400).json({ message: `SQL database error ${err}` });
+            console.log(`SQL database error ${err}`);
+            return res.status(400).json({ message: "Server error" });
         }
 
         const response = result[0][0];

@@ -46,6 +46,7 @@ export default class Login extends React.Component {
             // Check for successful response
             if (data.status === 200) {
                 data.json().then((data) => {
+                    console.log(data.token);
                     localStorage.setItem("token", data.token);
                 });
             }

@@ -59,6 +59,8 @@ CREATE PROCEDURE insert_user_login(IN input_email VARCHAR(255), IN input_usernam
 BEGIN
     DECLARE emailExists INT;
     DECLARE passLength INT;
+    DECLARE tokenID CHAR(255);
+    DECLARE userID INT;
     DECLARE salt VARCHAR(255);
 
     -- Create response table
@@ -79,11 +81,19 @@ BEGIN
         -- Generate salt
         SET salt = HEX(RANDOM_BYTES(64));
 
+        -- Create token id
+        SET tokenID = UUID();
+
         -- Insert user
         INSERT INTO USER_LOGIN (EMAIL, USERNAME, PASS, SALT) VALUES (input_email, input_username, SHA2(CONCAT(input_pass, salt), 256), salt);
         INSERT INTO SCORES (SCORE, ID) VALUES (0, (SELECT ID FROM USER_LOGIN WHERE EMAIL = input_email));
         INSERT INTO USER_INFO (DATEJOINED, ID) VALUES (NOW(), (SELECT ID FROM USER_LOGIN WHERE EMAIL = input_email));
-        INSERT INTO RESPONSE VALUES ('SUCCESS', 'USER_CREATED');
+
+        -- Insert token
+        SELECT ID INTO userID FROM USER_LOGIN WHERE EMAIL = input_email;
+        INSERT INTO TOKEN_TABLE (TOKEN, EXPIRATION_DATE, ID) VALUES (tokenID, DATE_ADD(NOW(), INTERVAL 1 DAY), userID);
+
+        INSERT INTO RESPONSE VALUES ('SUCCESS', tokenID);
     END IF;
 
     SELECT * FROM RESPONSE;
@@ -124,8 +134,15 @@ BEGIN
         IF hashsedPass != (SELECT PASS FROM USER_LOGIN WHERE ID = userID) THEN
             INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER');
         ELSE
-            -- Insert token
-            INSERT INTO TOKEN_TABLE (TOKEN, EXPIRATION_DATE, ID) VALUES (tokenID, DATE_ADD(NOW(), INTERVAL 1 DAY), userID);
+            -- Check for existing token
+            IF (SELECT COUNT(*) FROM TOKEN_TABLE WHERE ID = userID AND EXPIRATION_DATE > NOW()) > 0 THEN
+                -- Get existing token
+                SELECT TOKEN INTO tokenID FROM TOKEN_TABLE WHERE ID = userID;
+            ELSE
+                -- Insert new token if none exists
+                INSERT INTO TOKEN_TABLE (TOKEN, EXPIRATION_DATE, ID) VALUES (tokenID, DATE_ADD(NOW(), INTERVAL 1 DAY), userID);
+            END IF;
+            
             INSERT INTO RESPONSE VALUES ('SUCCESS', tokenID);
         END IF;
     END IF;

@@ -23,12 +23,18 @@ export default class Profile extends React.Component {
     }
 
     retrieveUserInfo() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const user = urlParams.get("user");
+
         // Retrieve user from backend
-        fetch("/api/get_user", {
-            method: "GET",
+        fetch("/api/get_user?user=" + user, {
+            method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
+            body: JSON.stringify({
+                token: localStorage.getItem("token")
+            })
         }).then((data) => {
             // Check for successful response
             if (data.status === 200) {
@@ -38,8 +44,26 @@ export default class Profile extends React.Component {
                         username: data.username,
                         dateJoined: data.dateJoined,
                         score: data.score,
-                        friends: data.friends
                     });
+                });
+            }
+        });
+
+        // Retrieve friends from backend
+        fetch("/api/get_friends?user=" + user, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }, 
+            body: JSON.stringify({
+                token: localStorage.getItem("token")
+            })
+        }).then((data) => {
+            // Check for successful response
+            if (data.status === 200) {
+                data.json().then((data) => {
+                    // Set friends list
+                    this.setState({ friends: data.friends });
                 });
             }
         });
