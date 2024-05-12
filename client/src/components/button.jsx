@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Colors from '../constants/Colors.jsx';
+import Transitions from '../constants/Transitions.jsx';
 
 export default class Button extends React.Component {
     constructor(props) {
@@ -32,7 +33,7 @@ export default class Button extends React.Component {
                     padding: "0.5rem",
                     borderRadius: "0.5rem",
                     fontSize: "1rem",
-                    transition: "all 0.25s ease",
+                    transition: Transitions.Hover(),
                     cursor: "pointer"
                 }}
                 onMouseEnter={this.handleHover}

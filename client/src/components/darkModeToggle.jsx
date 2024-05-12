@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Colors from '../constants/Colors.jsx';
+import Transitions from '../constants/Transitions.jsx';
 
 export default class DarkModeToggle extends React.Component {
     constructor(props) {
@@ -31,7 +32,7 @@ export default class DarkModeToggle extends React.Component {
                     width: "2.5rem",
                     height: "2.5rem",
                     border: "none",
-                    transition: "all 0.25s ease",
+                    transition: Transitions.Hover(),
                     cursor: "pointer",
                     position: "absolute",
                     right: "1rem",

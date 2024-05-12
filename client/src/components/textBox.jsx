@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Colors from '../constants/Colors.jsx';
+import Transitions from '../constants/Transitions.jsx';
 
 export default class TextBox extends React.Component {
     constructor(props) {
@@ -55,7 +56,7 @@ export default class TextBox extends React.Component {
                     borderRadius: "0.5rem",
                     fontSize: "1rem",
                     width: "100%",
-                    transition: "all 0.25s ease",
+                    transition: Transitions.Hover(),
                     boxShadow: this.state.focused ? "0 0 8px 0" + Colors.Accent(3) : "",
                     "--autofill-bg": Colors.Background(),
                     "--autofill-text": color,

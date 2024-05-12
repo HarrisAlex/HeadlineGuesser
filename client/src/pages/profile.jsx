@@ -2,8 +2,10 @@ import React from 'react';
 
 import { LanguageContext } from '../contexts/LanguageContext.js';
 
+import Link from '../components/link.jsx';
+
 import Strings from '../constants/Strings.jsx';
-import Leaderboard from './leaderboard';
+import Colors from '../constants/Colors.jsx';
 
 export default class Profile extends React.Component {
     constructor (props) {
@@ -73,22 +75,60 @@ export default class Profile extends React.Component {
         // Create friends list from array
         let friendsList = this.state.friends.map((element, index) => {
             return (
-                <li key={index}>{element.username}</li>
+                <li key={index}>
+                    <Link href={"/profile?user=" + element} text={element} />
+                </li>
             );
         });
 
         return (
             <LanguageContext.Consumer>
             {({ language }) => (
-                <div>
-                    <h1>Profile</h1>
-                    <p>{Strings.Username(language)}: {this.state.username}</p>
-                    <p>{Strings.DateJoined(language)}: {this.state.dateJoined}</p>
-                    <p>{Strings.Score(language)}: {this.state.points}</p>
-                    <h2>{Strings.Friends(language)}</h2>
-                    <ul>
-                        {friendsList}
-                    </ul>
+                <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "40svw 60svw",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    minHeight: "calc(100svh - 6rem)",
+                }}>
+                    <section style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "1rem",
+                    }}>
+                        <h1>{this.state.username}</h1>
+                        <div style={{
+                            width: "25svh",
+                            height: "25svh",
+                            borderRadius: "50%",
+                            backgroundColor: Colors.OffsetBackground(),
+                            margin: "auto",
+                        }}></div>
+                        <p>{Strings.DateJoined(language)}: {this.state.dateJoined}</p>
+                        <p>{Strings.Score(language)}: {this.state.points}</p>
+                    </section>
+                    <section style={{
+                        paddingLeft: "1rem",
+                        paddingRight: "1rem"
+                    }}>
+                        <section>
+                            <h2>{Strings.Rank(language)}</h2>
+                            <div style={{
+                                width: "100%",
+                                height: "5rem",
+                                backgroundColor: Colors.OffsetBackground(),
+                            }}></div>
+                        </section>
+                        <section>
+                            <h2>{Strings.Friends(language)} ({this.state.friends.length})</h2>
+                            <ul>
+                                {friendsList}
+                            </ul>
+                        </section>
+                    </section>
                 </div>
             )}
             </LanguageContext.Consumer>

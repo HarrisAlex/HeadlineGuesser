@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Colors from '../constants/Colors.jsx';
+import Transitions from '../constants/Transitions.jsx';
 
 export default class NavLink extends React.Component {
     constructor(props) {
@@ -37,7 +38,7 @@ export default class NavLink extends React.Component {
                     color: color,
                     borderColor: this.state.isHovered ? Colors.Accent(1) : Colors.Text(),
                     fontSize: "1.15rem",
-                    transition: "all 0.25s ease",
+                    transition: Transitions.Hover(),
                     cursor: "pointer",
                 }}
                 {...this.props}>

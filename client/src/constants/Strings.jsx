@@ -71,6 +71,18 @@ export default class Strings {
         }
     }
 
+    static Profile(language) {
+        switch (language) {
+            case "spanish":
+                return "Perfil";
+            case "french":
+                return "Profil";
+            case "english":
+            default:
+                return "Profile";
+        }
+    }
+
     static NextQuestion(language) {
         switch (language) {
             case "spanish":
