@@ -206,15 +206,13 @@ app.post("/api/update_score", (req, res) => {
 // +==================================+
 // |          Get User API            |
 // +==================================+
-// Incoming: { }
+// Incoming: { username }
 // Outgoing: { status, username, dateJoined, score, friends }
-app.post("/api/get_user", (req, res) => {
-    const { token } = req.body;
-
+app.get("/api/get_user", (req, res) => {
     let id = req.query.user;
     
-    const sql = "CALL get_user(?, ?)";
-    const params = [token, id];
+    const sql = "CALL get_user(?)";
+    const params = [id];
 
     db.query(sql, params, function(err, result) {
         if (err) {
@@ -235,15 +233,13 @@ app.post("/api/get_user", (req, res) => {
 // +==================================+
 // |         Get Friends API          |
 // +==================================+
-// Incoming: { }
+// Incoming: { username }
 // Outgoing: { status, username, dateJoined, score, friends }
-app.post("/api/get_friends", (req, res) => {
-    const { token } = req.body;
-
+app.get("/api/get_friends", (req, res) => {
     let id = req.query.user;
     
-    const sql = "CALL get_friends(?, ?)";
-    const params = [token, id];
+    const sql = "CALL get_friends(?)";
+    const params = [id];
 
     db.query(sql, params, function(err, result) {
         if (err) {
@@ -252,8 +248,6 @@ app.post("/api/get_friends", (req, res) => {
         }
 
         const response = result[0][0];
-
-        console.log(result);
 
         if (response.RESPONSE_STATUS === "ERROR") {
             return res.status(400).json({ message: response.RESPONSE_MESSAGE });

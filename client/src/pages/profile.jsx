@@ -30,13 +30,10 @@ export default class Profile extends React.Component {
 
         // Retrieve user from backend
         fetch("/api/get_user?user=" + user, {
-            method: "POST",
+            method: "GET",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                token: localStorage.getItem("token")
-            })
         }).then((data) => {
             // Check for successful response
             if (data.status === 200) {
@@ -53,13 +50,10 @@ export default class Profile extends React.Component {
 
         // Retrieve friends from backend
         fetch("/api/get_friends?user=" + user, {
-            method: "POST",
+            method: "GET",
             headers: {
                 "Content-Type": "application/json"
             }, 
-            body: JSON.stringify({
-                token: localStorage.getItem("token")
-            })
         }).then((data) => {
             // Check for successful response
             if (data.status === 200) {
