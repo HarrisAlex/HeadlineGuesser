@@ -5,9 +5,22 @@ const port = 3100;
 const questionBank = require("./questionBank.json");
 const languages = require("./languages.json").languages;
 
+// Response codes
+const responseCodes = {
+    missingInput: "MISSING_INPUT",
+    invalidAnswerFormat: "INVALID_ANSWER_FORMAT",
+    serverError: "SERVER_ERROR",
+    loginSuccess: "LOGIN_SUCCESS",
+    signupSuccess: "SIGNUP_SUCCESS",
+    invalidLanguage: "INVALID_LANGUAGE",
+    invalidQuestion: "INVALID_QUESTION",
+    invalidAnswer: "INVALID_ANSWER",
+}
+
 // Database
 const db = require('./database.js');
 const { ok } = require('assert');
+const { sign } = require('crypto');
 
 app.use(express.json());
 
@@ -41,7 +54,7 @@ app.post("/api/login", (req, res) => {
     const { email, pass } = req.body;
 
     if (!email || !pass) {
-        return res.status(400).json({ message: "Invalid username or password" });
+        return res.status(400).json({ message: responseCodes.missingInput });
     }
 
     const data = sanitizeData({ email, pass });
@@ -52,7 +65,7 @@ app.post("/api/login", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: "Server error" });
+            return res.status(500).json({ message: responseCodes.serverError });
         }
 
         const response = result[0][0];
@@ -63,7 +76,7 @@ app.post("/api/login", (req, res) => {
             return res.status(400).json({ message: response.RESPONSE_MESSAGE });
         }
 
-        return res.status(200).json({ message: "Login successful!", token: response.RESPONSE_MESSAGE });
+        return res.status(200).json({ message: responseCodes.loginSuccess, token: response.RESPONSE_MESSAGE });
     }); 
 });
 
@@ -76,7 +89,7 @@ app.post("/api/signup", (req, res) => {
     const { email, username, pass } = req.body;
 
     if (!email || !username || !pass) {
-        return res.status(400).json({ message: "Invalid username or password" });
+        return res.status(400).json({ message: responseCodes.missingInput });
     }
 
     const data = sanitizeData({ email, username, pass});
@@ -87,7 +100,7 @@ app.post("/api/signup", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: "Server error" });
+            return res.status(500).json({ message: responseCodes.serverError });
         }
 
         const response = result[0][0];
@@ -96,20 +109,7 @@ app.post("/api/signup", (req, res) => {
             return res.status(400).json({ message: response.RESPONSE_MESSAGE });
         }
 
-        return res.status(200).json({ message: "Signup successful!", token: response.RESPONSE_MESSAGE });
-    });
-});
-
-app.get("/api/users", (req, res) => {
-    const sql = "SELECT * FROM USER_LOGIN";
-
-    db.query(sql, function(err, result) {
-        if (err) {
-            console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: "Server error" });
-        }
-
-        return res.status(200).json({ message: "success", users: result });
+        return res.status(200).json({ message: responseCodes.signupSuccess, token: response.RESPONSE_MESSAGE });
     });
 });
 
@@ -122,13 +122,14 @@ app.post("/api/question", (req, res) => {
     const { language } = req.body;
 
     if (!isValidLanguage(language)) {
-        return res.status(400).json({ message: "Invalid language" });
+        return res.status(400).json({ message: responseCodes.invalidLanguage });
     }
 
     let randomQuestion = getRandomQuestion(language);
 
     if (!randomQuestion) {
-        return res.status(500).json({ message: "Error getting question" });
+        console.log("Error getting random question");
+        return res.status(500).json({ message: responseCodes.serverError });
     }
 
    return res.status(200).json({ questionString: randomQuestion.question.question, question: randomQuestion.index, choices: randomQuestion.question.answers });
@@ -143,12 +144,13 @@ app.post("/api/answer", (req, res) => {
     const { language, question, answer } = req.body;
 
     if (!isValidLanguage(language)) {
-        return res.status(400).json({ message: "Invalid language" });
+        return res.status(400).json({ message: responseCodes.invalidLanguage });
     }
 
-    if (question < 0 || answer < 0) {
-        return res.status(400).json({ message: "Invalid question or answer" });
-    }
+    if (question < 0) 
+        return res.status(400).json({ message: responseCodes.invalidQuestion });
+    else if (answer < 0)
+        return res.status(400).json({ message: responseCodes.invalidAnswer });
 
     return res.status(200).json({ correct: isCorrectAnswer(language, question, answer) });
 });
@@ -164,7 +166,7 @@ app.get("/api/leaderboard", (req, res) => {
     db.query(sql, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: "Server error" });
+            return res.status(500).json({ message: responseCodes.serverError });
         }
 
         return res.status(200).json({ leaderboard: result[0] });
@@ -180,11 +182,11 @@ app.post("/api/update_scores", (req, res) => {
     const { token, locationCorrect, sourceCorrect, topicCorrect } = req.body;
 
     if (!token || locationCorrect === undefined || sourceCorrect === undefined || topicCorrect === undefined) {
-        return res.status(400).json({ message: "MISSING_INPUT" });
+        return res.status(400).json({ message: responseCodes.missingInput });
     }
 
     if (typeof locationCorrect !== "boolean" || typeof sourceCorrect !== "boolean" || typeof topicCorrect !== "boolean")
-        return res.status(400).json({ message: "INVALID_ANSWER_FORMAT" });
+        return res.status(400).json({ message: responseCodes.invalidAnswerFormat });
 
     const data = sanitizeData({ token, locationCorrect, sourceCorrect, topicCorrect });
 
@@ -198,7 +200,7 @@ app.post("/api/update_scores", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: "Server error" });
+            return res.status(500).json({ message: responseCodes.serverError });
         }
 
         const response = result[0][0];
@@ -225,7 +227,7 @@ app.get("/api/get_user", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: "Server error" });
+            return res.status(500).json({ message: responseCodes.serverError });
         }
 
         const response = result[0][0];
@@ -244,9 +246,9 @@ app.get("/api/get_user", (req, res) => {
         };
 
         const accuracyInfo = {
-            location: response.TOTAL_PLAYED == 0 ? 0 : parseFloat(response.LOCATION_TOTAL_CORRECT / response.TOTAL_PLAYED),
-            source: response.TOTAL_PLAYED == 0 ? 0 : parseFloat(response.SOURCE_TOTAL_CORRECT / response.TOTAL_PLAYED),
-            topic: response.TOTAL_PLAYED == 0 ? 0 : parseFloat(response.TOPIC_TOTAL_CORRECT / response.TOTAL_PLAYED)
+            location: response.TOTAL_PLAYED === 0 ? 0 : parseFloat(response.LOCATION_TOTAL_CORRECT / response.TOTAL_PLAYED),
+            source: response.TOTAL_PLAYED === 0 ? 0 : parseFloat(response.SOURCE_TOTAL_CORRECT / response.TOTAL_PLAYED),
+            topic: response.TOTAL_PLAYED === 0 ? 0 : parseFloat(response.TOPIC_TOTAL_CORRECT / response.TOTAL_PLAYED)
         };
 
         const levelInfo = {
@@ -273,7 +275,7 @@ app.get("/api/get_friends", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: "Server error" });
+            return res.status(500).json({ message: responseCodes.serverError });
         }
 
         const response = result[0][0];
