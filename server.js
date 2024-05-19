@@ -174,19 +174,26 @@ app.get("/api/leaderboard", (req, res) => {
 // +==================================+
 // |            Score API             |
 // +==================================+
-// Incoming: { }
-// Outgoing: { status, score }
-app.post("/api/update_score", (req, res) => {
-    const { token, score } = req.body;
+// Incoming: { token, locationCorrect, sourceCorrect, topicCorrect }
+// Outgoing: { status }
+app.post("/api/update_scores", (req, res) => {
+    const { token, locationCorrect, sourceCorrect, topicCorrect } = req.body;
 
-    if (!token || !score) {
-        return res.status(400).json({ message: "Invalid token or score" });
+    if (!token || locationCorrect === undefined || sourceCorrect === undefined || topicCorrect === undefined) {
+        return res.status(400).json({ message: "MISSING_INPUT" });
     }
 
-    const data = sanitizeData({ token, score });
+    if (typeof locationCorrect !== "boolean" || typeof sourceCorrect !== "boolean" || typeof topicCorrect !== "boolean")
+        return res.status(400).json({ message: "INVALID_ANSWER_FORMAT" });
 
-    const sql = "CALL update_score(?, ?)";
-    const params = [data.token, data.score];
+    const data = sanitizeData({ token, locationCorrect, sourceCorrect, topicCorrect });
+
+    data.locationCorrect = data.locationCorrect ? 1 : 0;
+    data.sourceCorrect = data.sourceCorrect ? 1 : 0;
+    data.topicCorrect = data.topicCorrect ? 1 : 0;
+
+    const sql = "CALL update_scores(?, ?, ?, ?)";
+    const params = [data.token, data.locationCorrect, data.sourceCorrect, data.topicCorrect];
 
     db.query(sql, params, function(err, result) {
         if (err) {
