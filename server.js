@@ -208,7 +208,7 @@ app.post("/api/update_score", (req, res) => {
 // |          Get User API            |
 // +==================================+
 // Incoming: { username }
-// Outgoing: { status, username, dateJoined, score, friends }
+// Outgoing: { status, username, dateJoined, overallLevel, streaks, accuracy, totalPlayed, levelInfo }
 app.get("/api/get_user", (req, res) => {
     let id = req.query.user;
     
@@ -227,7 +227,28 @@ app.get("/api/get_user", (req, res) => {
             return res.status(400).json({ message: response.RESPONSE_MESSAGE });
         }
 
-        return res.status(200).json({ username: response.USERNAME, dateJoined: response.DATE_JOINED, score: response.SCORE, friends: response.FRIENDS });
+        const streakInfo = {
+            location: response.LOCATION_STREAK,
+            locationHigh: response.LOCATION_STREAK_HIGH,
+            source: response.SOURCE_STREAK,
+            sourceHigh: response.SOURCE_STREAK_HIGH,
+            topic: response.TOPIC_STREAK,
+            topicHigh: response.TOPIC_STREAK_HIGH
+        };
+
+        const accuracyInfo = {
+            location: response.TOTAL_PLAYED == 0 ? 0 : parseFloat(response.LOCATION_TOTAL_CORRECT / response.TOTAL_PLAYED),
+            source: response.TOTAL_PLAYED == 0 ? 0 : parseFloat(response.SOURCE_TOTAL_CORRECT / response.TOTAL_PLAYED),
+            topic: response.TOTAL_PLAYED == 0 ? 0 : parseFloat(response.TOPIC_TOTAL_CORRECT / response.TOTAL_PLAYED)
+        };
+
+        const levelInfo = {
+            location: response.LOCATION_LEVEL,
+            source: response.SOURCE_LEVEL,
+            topic: response.TOPIC_LEVEL
+        };
+
+        return res.status(200).json({ username: response.USERNAME, dateJoined: response.JOINDATE, overallLevel: response.OVERALL_LEVEL, streaks: streakInfo, accuracy: accuracyInfo, totalPlayed: response.TOTAL_PLAYED, levels: levelInfo });
     });
 });
 

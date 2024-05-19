@@ -18,7 +18,28 @@ CREATE TABLE USER_LOGIN (
 
 CREATE TABLE SCORES (
     ID INT NOT NULL PRIMARY KEY,
-    SCORE INT NOT NULL,
+    OVERALL_LEVEL INT NOT NULL,
+
+    LOCATION_STREAK INT NOT NULL,
+    SOURCE_STREAK INT NOT NULL,
+    TOPIC_STREAK INT NOT NULL,
+
+    LOCATION_STREAK_HIGH INT NOT NULL,
+    SOURCE_STREAK_HIGH INT NOT NULL,
+    TOPIC_STREAK_HIGH INT NOT NULL,
+
+    LOCATION_TOTAL_CORRECT INT NOT NULL,
+    SOURCE_TOTAL_CORRECT INT NOT NULL,
+    TOPIC_TOTAL_CORRECT INT NOT NULL,
+
+    TOTAL_PLAYED INT NOT NULL,
+
+    LOCATION_LEVEL INT NOT NULL,
+    SOURCE_LEVEL INT NOT NULL,
+    TOPIC_LEVEL INT NOT NULL,
+
+    LAST_DATE TIMESTAMP NOT NULL,
+
     FOREIGN KEY (ID) REFERENCES USER_LOGIN(ID)
 );
 
@@ -86,7 +107,8 @@ BEGIN
 
         -- Insert user
         INSERT INTO USER_LOGIN (EMAIL, USERNAME, PASS, SALT) VALUES (input_email, input_username, SHA2(CONCAT(input_pass, salt), 256), salt);
-        INSERT INTO SCORES (SCORE, ID) VALUES (0, (SELECT ID FROM USER_LOGIN WHERE EMAIL = input_email));
+        INSERT INTO SCORES (OVERALL_LEVEL, ID, LOCATION_STREAK, SOURCE_STREAK, TOPIC_STREAK, LOCATION_STREAK_HIGH, SOURCE_STREAK_HIGH, TOPIC_STREAK_HIGH, LOCATION_TOTAL_CORRECT, SOURCE_TOTAL_CORRECT, TOPIC_TOTAL_CORRECT, TOTAL_PLAYED, LOCATION_LEVEL, SOURCE_LEVEL, TOPIC_LEVEL, LAST_DATE)
+            VALUES (1, (SELECT ID FROM USER_LOGIN WHERE EMAIL = input_email), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, NOW());
         INSERT INTO USER_INFO (DATEJOINED, ID) VALUES (NOW(), (SELECT ID FROM USER_LOGIN WHERE EMAIL = input_email));
 
         -- Insert token
@@ -154,10 +176,24 @@ DELIMITER ;
 
 DELIMITER //
 -- UPDATE SCORE
-CREATE PROCEDURE update_score(IN input_token CHAR(255), IN input_score INT)
+CREATE PROCEDURE update_scores(IN input_token CHAR(255), IN location_correct INT, IN source_correct INT, IN topic_correct INT)
 BEGIN
     DECLARE isValid INT DEFAULT 0;
-    DECLARE userScore INT;
+    DECLARE userOverallLevel INT;
+    DECLARE userLocationStreak INT;
+    DECLARE userSourceStreak INT;
+    DECLARE userTopicStreak INT;
+    DECLARE userLocationStreakHigh INT;
+    DECLARE userSourceStreakHigh INT;
+    DECLARE userTopicStreakHigh INT;
+    DECLARE userLocationTotalCorrect INT;
+    DECLARE userSourceTotalCorrect INT;
+    DECLARE userTopicTotalCorrect INT;
+    DECLARE userTotalPlayed INT;
+    DECLARE userLocationLevel INT;
+    DECLARE userSourceLevel INT;
+    DECLARE userTopicLevel INT;
+    DECLARE userLastDate TIMESTAMP;
     DECLARE userID INT;
 
     -- Create response table
@@ -174,9 +210,94 @@ BEGIN
     ELSE
         -- Get user id
         SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
-        SELECT SCORE INTO userScore FROM SCORES WHERE ID = userID;
+
+        -- Get user scores
+        SELECT OVERALL_LEVEL INTO userOverallLevel FROM SCORES WHERE ID = userID;
+        SELECT LOCATION_STREAK INTO userLocationStreak FROM SCORES WHERE ID = userID;
+        SELECT SOURCE_STREAK INTO userSourceStreak FROM SCORES WHERE ID = userID;
+        SELECT TOPIC_STREAK INTO userTopicStreak FROM SCORES WHERE ID = userID;
+        SELECT LOCATION_STREAK_HIGH INTO userLocationStreakHigh FROM SCORES WHERE ID = userID;
+        SELECT SOURCE_STREAK_HIGH INTO userSourceStreakHigh FROM SCORES WHERE ID = userID;
+        SELECT TOPIC_STREAK_HIGH INTO userTopicStreakHigh FROM SCORES WHERE ID = userID;
+        SELECT LOCATION_TOTAL_CORRECT INTO userLocationTotalCorrect FROM SCORES WHERE ID = userID;
+        SELECT SOURCE_TOTAL_CORRECT INTO userSourceTotalCorrect FROM SCORES WHERE ID = userID;
+        SELECT TOPIC_TOTAL_CORRECT INTO userTopicTotalCorrect FROM SCORES WHERE ID = userID;
+        SELECT TOTAL_PLAYED INTO userTotalPlayed FROM SCORES WHERE ID = userID;
+        SELECT LOCATION_LEVEL INTO userLocationLevel FROM SCORES WHERE ID = userID;
+        SELECT SOURCE_LEVEL INTO userSourceLevel FROM SCORES WHERE ID = userID;
+        SELECT TOPIC_LEVEL INTO userTopicLevel FROM SCORES WHERE ID = userID;
+        SELECT LAST_DATE INTO userLastDate FROM SCORES WHERE ID = userID;
+
+        -- Check if streaks are broken
+        IF userLastDate < DATE_SUB(NOW(), INTERVAL 1 DAY) THEN
+            SET userLocationStreak = 0;
+            SET userSourceStreak = 0;
+            SET userTopicStreak = 0;
+        END IF;
+
+        -- Update streaks
+        IF location_correct = 1 THEN
+            SET userLocationStreak = userLocationStreak + 1;
+            IF userLocationStreak > userLocationStreakHigh THEN
+                SET userLocationStreakHigh = userLocationStreak;
+            END IF;
+        ELSE
+            SET userLocationStreak = 0;
+        END IF;
+
+        IF source_correct = 1 THEN
+            SET userSourceStreak = userSourceStreak + 1;
+            IF userSourceStreak > userSourceStreakHigh THEN
+                SET userSourceStreakHigh = userSourceStreak;
+            END IF;
+        ELSE
+            SET userSourceStreak = 0;
+        END IF;
+
+        IF topic_correct = 1 THEN
+            SET userTopicStreak = userTopicStreak + 1;
+            IF userTopicStreak > userTopicStreakHigh THEN
+                SET userTopicStreakHigh = userTopicStreak;
+            END IF;
+        ELSE
+            SET userTopicStreak = 0;
+        END IF;
+
+        -- Update total correct
+        SET userLocationTotalCorrect = userLocationTotalCorrect + location_correct;
+        SET userSourceTotalCorrect = userSourceTotalCorrect + source_correct;
+        SET userTopicTotalCorrect = userTopicTotalCorrect + topic_correct;
+
+        -- Update total played
+        SET userTotalPlayed = userTotalPlayed + 1;
+
+        -- Update levels
+        SET userLocationLevel = FLOOR(userLocationTotalCorrect / 10) + 1;
+        SET userSourceLevel = FLOOR(userSourceTotalCorrect / 10) + 1;
+        SET userTopicLevel = FLOOR(userTopicTotalCorrect / 10) + 1;
+        SET userOverallLevel = FLOOR((userLocationLevel + userSourceLevel + userTopicLevel) / 3);
+
+        -- Update last date
+        SET userLastDate = NOW();
+
+        -- Update scores
+        UPDATE SCORES SET LOCATION_STREAK = userLocationStreak, 
+            SOURCE_STREAK = userSourceStreak, 
+            TOPIC_STREAK = userTopicStreak, 
+            LOCATION_STREAK_HIGH = userLocationStreakHigh, 
+            SOURCE_STREAK_HIGH = userSourceStreakHigh, 
+            TOPIC_STREAK_HIGH = userTopicStreakHigh, 
+            LOCATION_TOTAL_CORRECT = userLocationTotalCorrect, 
+            SOURCE_TOTAL_CORRECT = userSourceTotalCorrect, 
+            TOPIC_TOTAL_CORRECT = userTopicTotalCorrect, 
+            TOTAL_PLAYED = userTotalPlayed, 
+            LOCATION_LEVEL = userLocationLevel, 
+            SOURCE_LEVEL = userSourceLevel, 
+            TOPIC_LEVEL = userTopicLevel, 
+            LAST_DATE = userLastDate 
+            WHERE ID = userID;
+
         -- Update score
-        UPDATE SCORES SET SCORE = (userScore + input_score) WHERE ID = userID;
         INSERT INTO RESPONSE VALUES ('SUCCESS', 'SCORE_UPDATED');
     END IF;
 
@@ -192,7 +313,20 @@ BEGIN
     DECLARE isValid INT DEFAULT 0;
     DECLARE userID INT;
     DECLARE outputUsername VARCHAR(255);
-    DECLARE userScore INT;
+    DECLARE userOverallLevel INT;
+    DECLARE userLocationStreak INT;
+    DECLARE userSourceStreak INT;
+    DECLARE userTopicStreak INT;
+    DECLARE userLocationStreakHigh INT;
+    DECLARE userSourceStreakHigh INT;
+    DECLARE userTopicStreakHigh INT;
+    DECLARE userLocationTotalCorrect INT;
+    DECLARE userSourceTotalCorrect INT;
+    DECLARE userTopicTotalCorrect INT;
+    DECLARE userTotalPlayed INT;
+    DECLARE userLocationLevel INT;
+    DECLARE userSourceLevel INT;
+    DECLARE userTopicLevel INT;
     DECLARE userJoinDate TIMESTAMP;
 
     -- Create response table
@@ -200,7 +334,20 @@ BEGIN
         RESPONSE_STATUS VARCHAR(20),
         RESPONSE_MESSAGE VARCHAR(255),
         USERNAME VARCHAR(255),
-        SCORE INT,
+        OVERALL_LEVEL INT,
+        LOCATION_STREAK INT,
+        SOURCE_STREAK INT,
+        TOPIC_STREAK INT,
+        LOCATION_STREAK_HIGH INT,
+        SOURCE_STREAK_HIGH INT,
+        TOPIC_STREAK_HIGH INT,
+        LOCATION_TOTAL_CORRECT INT,
+        SOURCE_TOTAL_CORRECT INT,
+        TOPIC_TOTAL_CORRECT INT,
+        TOTAL_PLAYED INT,
+        LOCATION_LEVEL INT,
+        SOURCE_LEVEL INT,
+        TOPIC_LEVEL INT,
         JOINDATE TIMESTAMP
     );
 
@@ -214,10 +361,38 @@ BEGIN
 
         -- Get username, score, date joined, and friend count
         SELECT USERNAME INTO outputUsername FROM USER_LOGIN WHERE ID = userID;
-        SELECT SCORE INTO userScore FROM SCORES WHERE ID = userID;
+        SELECT OVERALL_LEVEL INTO userOverallLevel FROM SCORES WHERE ID = userID;
+        SELECT LOCATION_STREAK INTO userLocationStreak FROM SCORES WHERE ID = userID;
+        SELECT SOURCE_STREAK INTO userSourceStreak FROM SCORES WHERE ID = userID;
+        SELECT TOPIC_STREAK INTO userTopicStreak FROM SCORES WHERE ID = userID;
+        SELECT LOCATION_STREAK_HIGH INTO userLocationStreakHigh FROM SCORES WHERE ID = userID;
+        SELECT SOURCE_STREAK_HIGH INTO userSourceStreakHigh FROM SCORES WHERE ID = userID;
+        SELECT TOPIC_STREAK_HIGH INTO userTopicStreakHigh FROM SCORES WHERE ID = userID;
+        SELECT LOCATION_TOTAL_CORRECT INTO userLocationTotalCorrect FROM SCORES WHERE ID = userID;
+        SELECT SOURCE_TOTAL_CORRECT INTO userSourceTotalCorrect FROM SCORES WHERE ID = userID;
+        SELECT TOPIC_TOTAL_CORRECT INTO userTopicTotalCorrect FROM SCORES WHERE ID = userID;
+        SELECT TOTAL_PLAYED INTO userTotalPlayed FROM SCORES WHERE ID = userID;
+        SELECT LOCATION_LEVEL INTO userLocationLevel FROM SCORES WHERE ID = userID;
+        SELECT SOURCE_LEVEL INTO userSourceLevel FROM SCORES WHERE ID = userID;
+        SELECT TOPIC_LEVEL INTO userTopicLevel FROM SCORES WHERE ID = userID;
         SELECT DATEJOINED INTO userJoinDate FROM USER_INFO WHERE ID = userID;
 
-        INSERT INTO RESPONSE VALUES ('SUCCESS', 'USER_FOUND', outputUsername, userScore, userJoinDate);
+        INSERT INTO RESPONSE VALUES ('SUCCESS', 'USER_FOUND', outputUsername, 
+            userOverallLevel, 
+            userLocationStreak, 
+            userSourceStreak, 
+            userTopicStreak, 
+            userLocationStreakHigh, 
+            userSourceStreakHigh, 
+            userTopicStreakHigh, 
+            userLocationTotalCorrect, 
+            userSourceTotalCorrect, 
+            userTopicTotalCorrect, 
+            userTotalPlayed, 
+            userLocationLevel, 
+            userSourceLevel, 
+            userTopicLevel, 
+            userJoinDate);
     END IF;
 
     SELECT * FROM RESPONSE;
