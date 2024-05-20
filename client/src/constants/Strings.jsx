@@ -71,6 +71,18 @@ export default class Strings {
         }
     }
 
+    static Rank(language) {
+        switch (language) {
+            case "spanish":
+                return "Rango";
+            case "french":
+                return "Rang";
+            case "english":
+            default:
+                return "Rank";
+        }
+    }
+
     static Profile(language) {
         switch (language) {
             case "spanish":

@@ -44,7 +44,7 @@ export default class Leaderboard extends React.Component {
                     backgroundColor: index % 2 === 1 ? Colors.OffsetBackground() : Colors.Background()
                 }} key={index}>
                     <td>{index + 1}</td>
-                    <td>{element.USERNAME}</td>
+                    <td><a href={"/profile?user=" + element.USERNAME}>{element.USERNAME}</a></td>
                     <td>{element.SCORE}</td>
                 </tr>
             );
@@ -75,7 +75,7 @@ export default class Leaderboard extends React.Component {
                             <tr>
                                 <th style={{width: "33%"}}>{Strings.Rank(language)}</th>
                                 <th style={{width: "33%"}}>{Strings.Username(language)}</th>
-                                <th style={{width: "33%"}}>{Strings.Score(language)}</th>
+                                <th style={{width: "33%"}}>{Strings.Level(language)}</th>
                             </tr>
                         </thead>
                         <tbody>

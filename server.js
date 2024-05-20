@@ -161,7 +161,7 @@ app.post("/api/answer", (req, res) => {
 // Incoming: { }
 // Outgoing: { status, leaderboard }
 app.get("/api/leaderboard", (req, res) => {
-    const sql = "CALL get_leaderboard()";
+    const sql = "SELECT * FROM LEADERBOARD";
 
     db.query(sql, function(err, result) {
         if (err) {
@@ -169,7 +169,7 @@ app.get("/api/leaderboard", (req, res) => {
             return res.status(500).json({ message: responseCodes.serverError });
         }
 
-        return res.status(200).json({ leaderboard: result[0] });
+        return res.status(200).json({ leaderboard: result });
     });
 });
 
