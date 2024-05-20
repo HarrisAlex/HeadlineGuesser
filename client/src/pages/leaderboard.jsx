@@ -21,8 +21,11 @@ export default class Leaderboard extends React.Component {
     }
 
     retrieveLeaderboard() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const leaderboard = urlParams.get("leaderboard");
+
         // Retrieve leaderboard from backend
-        fetch("/api/leaderboard", {
+        fetch("/api/leaderboard?leaderboard=" + leaderboard, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -37,14 +40,24 @@ export default class Leaderboard extends React.Component {
          });
     }
 
-    render() {        
+    render() {
+        if (this.state.leaderboard.length === 0) {
+            return null;
+        }
+
         let leaderboard = this.state.leaderboard.map((element, index) => {
             return (
                 <tr style={{
                     backgroundColor: index % 2 === 1 ? Colors.OffsetBackground() : Colors.Background()
                 }} key={index}>
                     <td>{index + 1}</td>
-                    <td><a href={"/profile?user=" + element.USERNAME}>{element.USERNAME}</a></td>
+                    {Object.entries(element).map((subelement, subindex) => {
+                            if (subelement[0] === "USERNAME") {
+                                return <td key={subindex}><a href={"/profile?user=" + subelement[1]}>{subelement[1]}</a></td>;
+                            }
+
+                            return <td key={subindex}>{subelement[1]}</td>;
+                        })}
                     <td>{element.SCORE}</td>
                 </tr>
             );
@@ -67,15 +80,20 @@ export default class Leaderboard extends React.Component {
                         marginLeft: "auto",
                         marginRight: "auto",
                         textAlign: "center",
-                        borderCollapse: "collapse"
+                        borderCollapse: "collapse",
                     }}>
                         <thead style={{
                             backgroundColor: Colors.OffsetBackground()
                         }}>
                             <tr>
-                                <th style={{width: "33%"}}>{Strings.Rank(language)}</th>
-                                <th style={{width: "33%"}}>{Strings.Username(language)}</th>
-                                <th style={{width: "33%"}}>{Strings.Level(language)}</th>
+                                <th style={{
+                                    padding: "1rem"
+                                }}>{Strings.Rank(language)}</th>
+                                {Object.entries(this.state.leaderboard[0]).map((subelement, subindex) => {
+                                    return <th style={{
+                                        padding: "1rem"
+                                    }}key={subindex}>{Strings.LeaderboardHeader(subelement[0], language)}</th>;
+                                })}
                             </tr>
                         </thead>
                         <tbody>

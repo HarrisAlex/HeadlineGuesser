@@ -143,6 +143,193 @@ export default class Strings {
         }
     };
 
+    static LeaderboardHeader(header, language) {
+        switch (header) {
+            case "USERNAME":
+                switch (language) {
+                    case "spanish":
+                        return "Nombre de Usuario";
+                    case "french":
+                        return "Nom d'Utilisateur";
+                    case "english":
+                    default:
+                        return "Username";
+                }
+            case "OVERALL_LEVEL":
+                switch (language) {
+                    case "spanish":
+                        return "Nivel";
+                    case "french":
+                        return "Niveau";
+                    case "english":
+                    default:
+                        return "Level";
+                }
+            case "LOCATION_STREAK":
+                switch (language) {
+                    case "spanish":
+                        return "Racha de Lugares";
+                    case "french":
+                        return "Série de Lieux";
+                    case "english":
+                    default:
+                        return "Location Streak";
+                }
+            case "SOURCE_STREAK":
+                switch (language) {
+                    case "spanish":
+                        return "Racha de Fuentes";
+                    case "french":
+                        return "Série de Sources";
+                    case "english":
+                    default:
+                        return "Source Streak";
+                }
+            case "TOPIC_STREAK":
+                switch (language) {
+                    case "spanish":
+                        return "Racha de Temas";
+                    case "french":
+                        return "Série de Thèmes";
+                    case "english":
+                    default:
+                        return "Topic Streak";
+                }
+            case "LOCATION_STREAK_HIGH":
+                switch (language) {
+                    case "spanish":
+                        return "Racha de Lugares Más Alta";
+                    case "french":
+                        return "Série de Lieux la Plus Longue";
+                    case "english":
+                    default:
+                        return "Highest Location Streak";
+                }
+            case "SOURCE_STREAK_HIGH":
+                switch (language) {
+                    case "spanish":
+                        return "Racha de Fuentes Más Alta";
+                    case "french":
+                        return "Série de Sources la Plus Longue";
+                    case "english":
+                    default:
+                        return "Highest Source Streak";
+                }
+            case "TOPIC_STREAK_HIGH":
+                switch (language) {
+                    case "spanish":
+                        return "Racha de Temas Más Alta";
+                    case "french":
+                        return "Série de Thèmes la Plus Longue";
+                    case "english":
+                    default:
+                        return "Highest Topic Streak";
+                }
+            case "LOCATION_TOTAL_CORRECT":
+                switch (language) {
+                    case "spanish":
+                        return "Total de Lugares Correctos";
+                    case "french":
+                        return "Total de Lieux Corrects";
+                    case "english":
+                    default:
+                        return "Total Correct Locations";
+                }
+            case "SOURCE_TOTAL_CORRECT":
+                switch (language) {
+                    case "spanish":
+                        return "Total de Fuentes Correctas";
+                    case "french":
+                        return "Total de Sources Correctes";
+                    case "english":
+                    default:
+                        return "Total Correct Sources";
+                }
+            case "TOPIC_TOTAL_CORRECT":
+                switch (language) {
+                    case "spanish":
+                        return "Total de Temas Correctos";
+                    case "french":
+                        return "Total de Thèmes Corrects";
+                    case "english":
+                    default:
+                        return "Total Correct Topics";
+                }
+            case "LOCATION_ACCURACY":
+                switch (language) {
+                    case "spanish":
+                        return "Precisión de Lugares";
+                    case "french":
+                        return "Précision des Lieux";
+                    case "english":
+                    default:
+                        return "Location Accuracy";
+                }
+            case "SOURCE_ACCURACY":
+                switch (language) {
+                    case "spanish":
+                        return "Precisión de Fuentes";
+                    case "french":
+                        return "Précision des Sources";
+                    case "english":
+                    default:
+                        return "Source Accuracy";
+                }
+            case "TOPIC_ACCURACY":
+                switch (language) {
+                    case "spanish":
+                        return "Precisión de Temas";
+                    case "french":
+                        return "Précision des Thèmes";
+                    case "english":
+                    default:
+                        return "Topic Accuracy";
+                }
+            case "LOCATION_ACCURACY_HIGH":
+                switch (language) {
+                    case "spanish":
+                        return "Precisión de Lugares Más Alta";
+                    case "french":
+                        return "Précision des Lieux la Plus Haute";
+                    case "english":
+                    default:
+                        return "Highest Location Accuracy";
+                }
+            case "SOURCE_ACCURACY_HIGH":
+                switch (language) {
+                    case "spanish":
+                        return "Precisión de Fuentes Más Alta";
+                    case "french":
+                        return "Précision des Sources la Plus Haute";
+                    case "english":
+                    default:
+                        return "Highest Source Accuracy";
+                }
+            case "TOPIC_ACCURACY_HIGH":
+                switch (language) {
+                    case "spanish":
+                        return "Precisión de Temas Más Alta";
+                    case "french":
+                        return "Précision des Thèmes la Plus Haute";
+                    case "english":
+                    default:
+                        return "Highest Topic Accuracy";
+                }
+            case "TOTAL_PLAYED":
+                switch (language) {
+                    case "spanish":
+                        return "Total Jugado";
+                    case "french":
+                        return "Total Joué";
+                    case "english":
+                    default:
+                        return "Total Played";
+                }
+            default:
+                return header;
+        }
+    };
+
     static ChooseLanguage(language) {
         switch (language) {
             case "spanish":

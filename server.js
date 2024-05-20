@@ -161,7 +161,11 @@ app.post("/api/answer", (req, res) => {
 // Incoming: { }
 // Outgoing: { status, leaderboard }
 app.get("/api/leaderboard", (req, res) => {
-    const sql = "SELECT * FROM LEADERBOARD";
+    const id = req.query.leaderboard;
+
+    const data = sanitizeData({ id });
+
+    const sql = "SELECT * FROM " + data.id;
 
     db.query(sql, function(err, result) {
         if (err) {
@@ -219,7 +223,7 @@ app.post("/api/update_scores", (req, res) => {
 // Incoming: { username }
 // Outgoing: { status, username, dateJoined, overallLevel, streaks, accuracy, totalPlayed, levelInfo }
 app.get("/api/get_user", (req, res) => {
-    let id = req.query.user;
+    const id = req.query.user;
     
     const sql = "CALL get_user(?)";
     const params = [id];
