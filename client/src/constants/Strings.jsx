@@ -190,27 +190,75 @@ export default class Strings {
         }
     }
 
-    static Score(language) {
+    static Statistics(language) {
         switch (language) {
             case "spanish":
-                return "Puntuación";
+                return "Estadísticas";
             case "french":
-                return "Score";
+                return "Statistiques";
             case "english":
             default:
-                return "Score";
+                return "Statistics";
         }
     }
 
-    static Rank(language) {
+    static Level(language) {
         switch (language) {
             case "spanish":
-                return "Rango";
+                return "Nivel";
             case "french":
-                return "Rang";
+                return "Niveau";
             case "english":
             default:
-                return "Rank";
+                return "Level";
+        }
+    }
+
+    static Streaks(language) {
+        switch (language) {
+            case "spanish":
+                return "Rachas";
+            case "french":
+                return "Séries";
+            case "english":
+            default:
+                return "Streaks";
+        }
+    }
+
+    static HighestStreaks(language) {
+        switch (language) {
+            case "spanish":
+                return "Rachas Más Altas";
+            case "french":
+                return "Séries les Plus Longues";
+            case "english":
+            default:
+                return "Highest Streaks";
+        }
+    }
+
+    static Accuracy(language) {
+        switch (language) {
+            case "spanish":
+                return "Precisión";
+            case "french":
+                return "Précision";
+            case "english":
+            default:
+                return "Accuracy";
+        }
+    }
+
+    static TotalPlayed(language) {
+        switch (language) {
+            case "spanish":
+                return "Total Jugado";
+            case "french":
+                return "Total Joué";
+            case "english":
+            default:
+                return "Total Played";
         }
     }
 

@@ -14,7 +14,26 @@ export default class Profile extends React.Component {
         this.state = {
             username: "",
             dateJoined: "",
-            score: "",
+            level: 0,
+            streaks: {
+                location: 0,
+                locationHigh: 0,
+                source: 0,
+                sourceHigh: 0,
+                topic: 0,
+                topicHigh: 0
+            },
+            accuracy: {
+                location: 0,
+                source: 0,
+                topic: 0
+            },
+            totalPlayed: 0,
+            levels: {
+                location: 0,
+                source: 0,
+                topic: 0
+            },
             friends: [],
         }
     }
@@ -41,9 +60,32 @@ export default class Profile extends React.Component {
                     // Set user information
                     this.setState({ 
                         username: data.username,
-                        dateJoined: data.dateJoined,
-                        score: data.score,
+                        level: data.overallLevel,
+                        streaks: {
+                            location: data.streaks.location,
+                            locationHigh: data.streaks.locationHigh,
+                            source: data.streaks.source,
+                            sourceHigh: data.streaks.sourceHigh,
+                            topic: data.streaks.topic,
+                            topicHigh: data.streaks.topicHigh
+                        },
+                        accuracy: {
+                            location: Math.floor(data.accuracy.location * 100) + "%",
+                            source: Math.floor(data.accuracy.source * 100) + "%",
+                            topic: Math.floor(data.accuracy.topic * 100) + "%"
+                        },
+                        totalPlayed: data.totalPlayed,
+                        levels: {
+                            location: data.levels.location,
+                            source: data.levels.source,
+                            topic: data.levels.topic
+                        }
                     });
+
+                    // Parse date joined
+                    const date = new Date(data.dateJoined);
+                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                    this.setState({ dateJoined: date.toLocaleDateString(undefined, options) });
                 });
             }
         });
@@ -102,23 +144,55 @@ export default class Profile extends React.Component {
                             margin: "auto",
                         }}></div>
                         <p>{Strings.DateJoined(language)}: {this.state.dateJoined}</p>
-                        <p>{Strings.Score(language)}: {this.state.points}</p>
+                        <p>{Strings.Level(language)}: {this.state.level}</p>
                     </section>
                     <section style={{
                         paddingLeft: "1rem",
                         paddingRight: "1rem"
                     }}>
                         <section>
-                            <h2>{Strings.Rank(language)}</h2>
+                            <h2>{Strings.Statistics(language)}</h2>
                             <div style={{
-                                width: "100%",
-                                height: "5rem",
+                                width: "50%",
+                                margin: "auto",
                                 backgroundColor: Colors.OffsetBackground(),
-                            }}></div>
+                                display: "grid",
+                                gridTemplateColumns: "1fr 1fr",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: "2rem",
+                                padding: "1rem",
+                            }}>
+                                <div>
+                                    <h3>{Strings.Streaks(language)}</h3>
+                                    <p>{this.state.streaks.location}</p>
+                                    <p>{this.state.streaks.source}</p>
+                                    <p>{this.state.streaks.topic}</p>
+                                </div>
+                                <div>
+                                    <h3>{Strings.HighestStreaks(language)}</h3>
+                                    <p>{this.state.streaks.locationHigh}</p>
+                                    <p>{this.state.streaks.sourceHigh}</p>
+                                    <p>{this.state.streaks.topicHigh}</p>
+                                </div>
+                                <div>
+                                    <h3>{Strings.Accuracy(language)}</h3>
+                                    <p>{this.state.accuracy.location}</p>
+                                    <p>{this.state.accuracy.source}</p>
+                                    <p>{this.state.accuracy.topic}</p>
+                                </div>
+                                <div>
+                                    <h3>{Strings.TotalPlayed(language)}</h3>
+                                    <p>{this.state.totalPlayed}</p>
+                                </div>
+                            </div>
                         </section>
                         <section>
                             <h2>{Strings.Friends(language)} ({this.state.friends.length})</h2>
-                            <ul>
+                            <ul style={{
+                                listStyleType: "none",
+                                padding: "0.5rem",
+                            }}>
                                 {friendsList}
                             </ul>
                         </section>
