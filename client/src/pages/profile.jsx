@@ -6,6 +6,7 @@ import Link from '../components/link.jsx';
 
 import Strings from '../constants/Strings.jsx';
 import Colors from '../constants/Colors.jsx';
+import Avatar from '../components/avatar.jsx';
 
 export default class Profile extends React.Component {
     constructor (props) {
@@ -136,13 +137,7 @@ export default class Profile extends React.Component {
                         gap: "1rem",
                     }}>
                         <h1>{this.state.username}</h1>
-                        <div style={{
-                            width: "25svh",
-                            height: "25svh",
-                            borderRadius: "50%",
-                            backgroundColor: Colors.OffsetBackground(),
-                            margin: "auto",
-                        }}></div>
+                        <Avatar colors={{ background: "black", border: "red", foreground: "red" }} foreground="0" width="25svh" height="25svh" />
                         <p>{Strings.DateJoined(language)}: {this.state.dateJoined}</p>
                         <p>{Strings.Level(language)}: {this.state.level}</p>
                     </section>
