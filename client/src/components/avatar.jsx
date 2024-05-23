@@ -9,6 +9,8 @@ import { ReactComponent as Foreground5 } from '../images/avatars/foreground_5.sv
 import { ReactComponent as Foreground6 } from '../images/avatars/foreground_6.svg';
 import { ReactComponent as Foreground7 } from '../images/avatars/foreground_7.svg';
 
+import Colors from '../constants/Colors.jsx';
+
 export default class Avatar extends React.Component {
     getForegroundSource() {
         return `/images/avatars/foreground_${this.state.foreground}.svg`;
@@ -18,7 +20,7 @@ export default class Avatar extends React.Component {
         const style = {
             width: "100%",
             height: "100%",
-            stroke: this.props.colors.foreground,
+            stroke: Colors.AvatarColors(this.props.colors.foreground),
             strokeWidth: "0.75px",
         };
 
@@ -49,11 +51,11 @@ export default class Avatar extends React.Component {
             <div style={{
                 width: this.props.width,
                 height: this.props.height,
-                backgroundColor: this.props.colors.background,
+                backgroundColor: Colors.AvatarColors(this.props.colors.background),
                 borderRadius: "50%",
                 overflow: "hidden",
                 borderStyle: "solid",
-                borderColor: this.props.colors.border,
+                borderColor: Colors.AvatarColors(this.props.colors.border),
                 borderWidth: "5px"
             }} {...this.props}>
                 {foreground}

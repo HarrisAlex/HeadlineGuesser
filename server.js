@@ -76,7 +76,7 @@ app.post("/api/login", (req, res) => {
             return res.status(400).json({ message: response.RESPONSE_MESSAGE });
         }
 
-        return res.status(200).json({ message: responseCodes.loginSuccess, token: response.RESPONSE_MESSAGE });
+        return res.status(200).json({ message: responseCodes.loginSuccess, token: response.TOKEN, username: response.USERNAME});
     }); 
 });
 
@@ -298,6 +298,72 @@ app.get("/api/get_friends", (req, res) => {
         }
 
         return res.status(200).json({ friends: friendsList });
+    });
+});
+
+// +==================================+
+// |        Set Avatar API            |
+// +==================================+
+// Incoming: { token, colors, foreground }
+// Outgoing: { status }
+app.post("/api/set_avatar", (req, res) => {
+    const { token, colors, foreground } = req.body;
+
+    if (!token || !colors || foreground === undefined) {
+        return res.status(400).json({ message: responseCodes.missingInput });
+    }
+
+    const data = sanitizeData({ token, colors, foreground });
+
+    const sql = "CALL set_avatar(?, ?, ?, ?, ?)";
+    const params = [data.token, data.colors.background, data.colors.border, data.colors.foreground, data.foreground];
+
+    db.query(sql, params, function(err, result) {
+        if (err) {
+            console.log(`SQL database error ${err}`);
+            return res.status(500).json({ message: responseCodes.serverError });
+        }
+
+        const response = result[0][0];
+
+        if (response.RESPONSE_STATUS === "ERROR") {
+            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        }
+
+        return res.status(200).json({ message: response.RESPONSE_MESSAGE });
+    });
+});
+
+// +==================================+
+// |        Get Avatar API            |
+// +==================================+
+// Incoming: { username }
+// Outgoing: { status, colors, foreground }
+app.get("/api/get_avatar", (req, res) => {
+    const id = req.query.user;
+
+    const sql = "CALL get_avatar(?)";
+
+    db.query(sql, [id], function(err, result) {
+        if (err) {
+            console.log(`SQL database error ${err}`);
+            return res.status(500).json({ message: responseCodes.serverError });
+        }
+
+        const response = result[0][0];
+
+        if (response.RESPONSE_STATUS === "ERROR") {
+            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        }
+
+        return res.status(200).json({ 
+            colors: { 
+                background: response.BGCOLOR, 
+                border: response.BORDERCOLOR, 
+                foreground: response.FGCOLOR 
+            }, 
+            foreground: response.FOREGROUND 
+        });
     });
 });
 

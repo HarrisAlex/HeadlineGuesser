@@ -108,6 +108,15 @@ CREATE TABLE FRIENDS (
     FOREIGN KEY (FRIEND) REFERENCES USER_LOGIN(ID)
 );
 
+CREATE TABLE AVATARS (
+    ID INT NOT NULL,
+    BGCOLOR INT NOT NULL,
+    BORDERCOLOR INT NOT NULL,
+    FGCOLOR INT NOT NULL,
+    FOREGROUND INT NOT NULL,
+    FOREIGN KEY (ID) REFERENCES USER_LOGIN(ID)
+);
+
 CREATE USER 'dev'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
 
 GRANT ALL PRIVILEGES ON db.* TO 'dev'@'localhost';
@@ -150,6 +159,7 @@ BEGIN
         INSERT INTO SCORES (OVERALL_LEVEL, ID, LOCATION_STREAK, SOURCE_STREAK, TOPIC_STREAK, LOCATION_STREAK_HIGH, SOURCE_STREAK_HIGH, TOPIC_STREAK_HIGH, LOCATION_TOTAL_CORRECT, SOURCE_TOTAL_CORRECT, TOPIC_TOTAL_CORRECT, TOTAL_PLAYED, LOCATION_LEVEL, SOURCE_LEVEL, TOPIC_LEVEL, LAST_DATE)
             VALUES (1, (SELECT ID FROM USER_LOGIN WHERE EMAIL = input_email), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, NOW());
         INSERT INTO USER_INFO (DATEJOINED, ID) VALUES (NOW(), (SELECT ID FROM USER_LOGIN WHERE EMAIL = input_email));
+        INSERT INTO AVATARS (ID, BGCOLOR, BORDERCOLOR, FGCOLOR, FOREGROUND) VALUES ((SELECT ID FROM USER_LOGIN WHERE EMAIL = input_email), 0, 0, 0, 0);
 
         -- Insert token
         SELECT ID INTO userID FROM USER_LOGIN WHERE EMAIL = input_email;
@@ -179,7 +189,9 @@ BEGIN
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
         RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255)
+        RESPONSE_MESSAGE VARCHAR(255),
+        TOKEN CHAR(255),
+        USERNAME VARCHAR(255)
     );
 
     -- Get all users by email
@@ -205,7 +217,7 @@ BEGIN
                 INSERT INTO TOKEN_TABLE (TOKEN, EXPIRATION_DATE, ID) VALUES (tokenID, DATE_ADD(NOW(), INTERVAL 1 DAY), userID);
             END IF;
             
-            INSERT INTO RESPONSE VALUES ('SUCCESS', tokenID);
+            INSERT INTO RESPONSE VALUES ('SUCCESS', 'VALIDATED_USER', tokenID, (SELECT USERNAME FROM USER_LOGIN WHERE ID = userID));
         END IF;
     END IF;
 
@@ -490,6 +502,79 @@ BEGIN
         END LOOP;
 
         CLOSE friendCursor;
+    END IF;
+
+    SELECT * FROM RESPONSE;
+    DROP TEMPORARY TABLE RESPONSE;
+END //
+DELIMITER ;
+
+DELIMITER //
+-- SET AVATAR
+CREATE PROCEDURE set_avatar(IN input_token CHAR(255), IN input_bgcolor INT, IN input_bordercolor INT, IN input_fgcolor INT, IN input_foreground INT)
+BEGIN
+    DECLARE isValid INT DEFAULT 0;
+    DECLARE userID INT;
+
+    -- Create response table
+    CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
+        RESPONSE_STATUS VARCHAR(20),
+        RESPONSE_MESSAGE VARCHAR(255)
+    );
+
+    -- Check if token is valid
+    SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
+    
+    IF isValid = 0 THEN
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
+    ELSE
+        -- Get user id
+        SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
+
+        -- Update avatar
+        UPDATE AVATARS SET BGCOLOR = input_bgcolor, BORDERCOLOR = input_bordercolor, FGCOLOR = input_fgcolor, FOREGROUND = input_foreground WHERE ID = userID;
+
+        INSERT INTO RESPONSE VALUES ('SUCCESS', 'AVATAR_UPDATED');
+    END IF;
+
+    SELECT * FROM RESPONSE;
+    DROP TEMPORARY TABLE RESPONSE;
+END //
+DELIMITER ;
+
+DELIMITER //
+-- GET AVATAR
+CREATE PROCEDURE get_avatar(IN input_username VARCHAR(255))
+BEGIN
+    DECLARE isValid INT DEFAULT 0;
+    DECLARE userID INT;
+    DECLARE user_bgcolor INT;
+    DECLARE user_bordercolor INT;
+    DECLARE user_fgcolor INT;
+    DECLARE user_foreground INT;
+
+    -- Create response table
+    CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
+        RESPONSE_STATUS VARCHAR(20),
+        RESPONSE_MESSAGE VARCHAR(255),
+        BGCOLOR INT,
+        BORDERCOLOR INT,
+        FGCOLOR INT,
+        FOREGROUND INT
+    );
+
+    SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE USERNAME = input_username;
+
+    IF isValid = 0 THEN
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER', NULL, NULL, NULL, NULL);
+    ELSE
+        -- Get user id
+        SELECT ID INTO userID FROM USER_LOGIN WHERE USERNAME = input_username;
+
+        -- Get avatar
+        SELECT BGCOLOR, BORDERCOLOR, FGCOLOR, FOREGROUND INTO user_bgcolor, user_bordercolor, user_fgcolor, user_foreground FROM AVATARS WHERE ID = userID;
+
+        INSERT INTO RESPONSE VALUES ('SUCCESS', 'AVATAR_FOUND', user_bgcolor, user_bordercolor, user_fgcolor, user_foreground);
     END IF;
 
     SELECT * FROM RESPONSE;

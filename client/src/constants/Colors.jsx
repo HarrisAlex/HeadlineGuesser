@@ -1,6 +1,8 @@
 let dark = localStorage.getItem("darkMode") === "true";
 
 export default class Colors {
+    static avatarColorsLength = 11;
+
     static Background() {
         return dark ? "#1F1F1F" : "#E8E8E8";
     }
@@ -46,6 +48,33 @@ export default class Colors {
                     console.warn("Colors.Accent() called with invalid level parameter.");
                     return "FF00FF";
             }
+        }
+    }
+
+    static AvatarColors(index) {
+        switch (index) {
+            case 0:
+                return "#FFFFFF";
+            case 1: 
+                return "#00FF00";
+            case 2:
+                return "#0000FF";
+            case 3:
+                return "#FFFF00";
+            case 4:
+                return "#FF00FF";
+            case 5:
+                return "#00FFFF";
+            case 6:
+                return "#FF8000";
+            case 7:
+                return "#8000FF";
+            case 8:
+                return "#FF0000";
+            case 9:
+                return "#000000";
+            case 10:
+                return "#808080";
         }
     }
     

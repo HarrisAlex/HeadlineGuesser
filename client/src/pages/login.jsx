@@ -48,6 +48,7 @@ export default class Login extends React.Component {
                 data.json().then((data) => {
                     console.log(data.token);
                     localStorage.setItem("token", data.token);
+                    localStorage.setItem("username", data.username);
                 });
             }
             else {

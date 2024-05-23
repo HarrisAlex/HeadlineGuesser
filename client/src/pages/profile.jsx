@@ -8,15 +8,18 @@ import Strings from '../constants/Strings.jsx';
 import Colors from '../constants/Colors.jsx';
 import Avatar from '../components/avatar.jsx';
 import AvatarEditor from '../components/avatarEditor.jsx';
+import Button from '../components/button.jsx';
 
 export default class Profile extends React.Component {
     constructor (props) {
         super(props);
 
+        this.openAvatarEditor = this.openAvatarEditor.bind(this);
+
         this.state = {
-            username: "",
-            dateJoined: "",
-            level: 0,
+            username: "user",
+            dateJoined: "August 8, 2003",
+            level: 1,
             streaks: {
                 location: 0,
                 locationHigh: 0,
@@ -37,6 +40,15 @@ export default class Profile extends React.Component {
                 topic: 0
             },
             friends: [],
+            avatarEditorOpen: false,
+            avatar: {
+                colors: {
+                    background: 10,
+                    border: 10,
+                    foreground: 10
+                },
+                foreground: 0
+            },
         }
     }
 
@@ -72,9 +84,9 @@ export default class Profile extends React.Component {
                             topicHigh: data.streaks.topicHigh
                         },
                         accuracy: {
-                            location: Math.floor(data.accuracy.location * 100) + "%",
-                            source: Math.floor(data.accuracy.source * 100) + "%",
-                            topic: Math.floor(data.accuracy.topic * 100) + "%"
+                            location: Math.floor(data.accuracy.location * 100),
+                            source: Math.floor(data.accuracy.source * 100),
+                            topic: Math.floor(data.accuracy.topic * 100)
                         },
                         totalPlayed: data.totalPlayed,
                         levels: {
@@ -107,6 +119,33 @@ export default class Profile extends React.Component {
                 });
             }
         });
+
+        // Retrieve avatar from backend
+        fetch("/api/get_avatar?user=" + user, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            },
+        }).then((data) => {
+            // Check for successful response
+            if (data.status === 200) {
+                data.json().then((data) => {
+                    // Set avatar
+                    this.setState({ avatar: {
+                        colors: {
+                            background: data.colors.background,
+                            border: data.colors.border,
+                            foreground: data.colors.foreground
+                        },
+                        foreground: data.foreground
+                    } });
+                });
+            }
+        });
+    }
+
+    openAvatarEditor() {
+        this.setState({ avatarEditorOpen: true });
     }
 
     render () {
@@ -118,6 +157,11 @@ export default class Profile extends React.Component {
                 </li>
             );
         });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const user = urlParams.get("user");
+
+        const avatarEditor = this.state.avatarEditorOpen ? <AvatarEditor colors={ this.state.avatar.colors } foreground={ this.state.avatar.foreground } open={this.state.avatarEditorOpen} close={() => this.setState({ avatarEditorOpen: false })}/> : null;
 
         return (
             <LanguageContext.Consumer>
@@ -138,7 +182,11 @@ export default class Profile extends React.Component {
                         gap: "1rem",
                     }}>
                         <h1>{this.state.username}</h1>
-                        <Avatar colors={{ background: "black", border: "red", foreground: "red" }} foreground="0" width="25svh" height="25svh" />
+                        <Avatar colors={{ 
+                            background: this.state.avatar.colors.background, 
+                            border: this.state.avatar.colors.border, 
+                            foreground: this.state.avatar.colors.foreground }} foreground={this.state.avatar.foreground} width="25svh" height="25svh" />
+                        {localStorage.getItem("username") === user ? <Button label={Strings.EditAvatar(language)} onClick={this.openAvatarEditor} /> : null}
                         <p>{Strings.DateJoined(language)}: {this.state.dateJoined}</p>
                         <p>{Strings.Level(language)}: {this.state.level}</p>
                     </section>
@@ -173,9 +221,9 @@ export default class Profile extends React.Component {
                                 </div>
                                 <div>
                                     <h3>{Strings.Accuracy(language)}</h3>
-                                    <p>{this.state.accuracy.location}</p>
-                                    <p>{this.state.accuracy.source}</p>
-                                    <p>{this.state.accuracy.topic}</p>
+                                    <p>{this.state.accuracy.location}%</p>
+                                    <p>{this.state.accuracy.source}%</p>
+                                    <p>{this.state.accuracy.topic}%</p>
                                 </div>
                                 <div>
                                     <h3>{Strings.TotalPlayed(language)}</h3>
@@ -193,7 +241,7 @@ export default class Profile extends React.Component {
                             </ul>
                         </section>
                     </section>
-                    <AvatarEditor />
+                    {avatarEditor}
                 </div>
             )}
             </LanguageContext.Consumer>
