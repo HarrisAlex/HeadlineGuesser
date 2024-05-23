@@ -9,24 +9,45 @@ export default class Button extends React.Component {
     constructor(props) {
         super(props);
 
+        this.handleHover = this.handleHover.bind(this);
+        this.handleUnhover = this.handleUnhover.bind(this);
+        this.handleFocus = this.handleFocus.bind(this);
+        this.handleBlur = this.handleBlur.bind(this);
+
         this.state = {
             isHovered: false,
+            clicked: false
         };
     }
 
-    handleHover = () => {
+    handleHover() {
         this.setState({ isHovered: true });
     }
 
-    handleUnhover = () => {
+    handleUnhover() {
         this.setState({ isHovered: false });
     }
 
+    handleFocus() {
+        this.setState({ clicked: true });
+
+        setTimeout(this.handleBlur, 200);
+    }
+
+    handleBlur() {
+        this.setState({ clicked: false });
+    }
+
     render() {
+        let color = this.state.isHovered ? Colors.Accent(1) : Colors.Text();
+        if (this.state.clicked) {
+            color = Colors.Accent(2);
+        }
+
         let style = {
-            background: "none",
-            color: this.state.isHovered ? Colors.Accent(1) : Colors.Text(),
-            borderColor: this.state.isHovered ? Colors.Accent(1) : Colors.Text(),
+            background: localStorage.getItem("darkMode") === "true" ? "none" : Colors.ButtonBackground(),
+            color: color,
+            borderColor: color,
             borderWidth: "1px",
             borderStyle: "solid",
             padding: "0.5rem",
@@ -42,6 +63,7 @@ export default class Button extends React.Component {
             case "close":
                 style = {
                     ...style,
+                    background: "none",
                     borderStyle: "none",
                     position: "absolute",
                     top: "0.5rem",
@@ -55,8 +77,11 @@ export default class Button extends React.Component {
                 text = <Close style={{
                     width: "100%",
                     height: "100%",
-                    stroke: this.state.isHovered ? Colors.Accent(1) : Colors.Text(),
+                    stroke: color,
+                    transition: Transitions.Hover(),
                 }}/>
+                break;
+            default:
                 break;
         }
 
@@ -66,6 +91,11 @@ export default class Button extends React.Component {
                 style={style}
                 onMouseEnter={this.handleHover}
                 onMouseLeave={this.handleUnhover}
+                onFocus={this.handleFocus}
+                onBlur={this.handleBlur}
+                onClick={() => {
+                    this.props.onClick();
+                }}
                 {...this.props}>{text}</button>
         );
     }

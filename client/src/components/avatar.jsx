@@ -56,7 +56,7 @@ export default class Avatar extends React.Component {
                 overflow: "hidden",
                 borderStyle: "solid",
                 borderColor: Colors.AvatarColors(this.props.colors.border),
-                borderWidth: "5px"
+                borderWidth: "5px",
             }} {...this.props}>
                 {foreground}
             </div>

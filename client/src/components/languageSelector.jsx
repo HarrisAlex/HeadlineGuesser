@@ -2,7 +2,6 @@ import React from 'react';
 
 import { LanguageContext } from '../contexts/LanguageContext.js';
 
-import LanguageSelectorButton from './languageSelectorButton.jsx';
 import Button from './button.jsx';
 
 import Strings from '../constants/Strings.jsx';
@@ -15,7 +14,6 @@ export default class LanguageSelector extends React.Component {
         super(props);
 
         this.state = {
-            open: false,
             languages: [{ language: "english", display: "English" }]
         };
     }
@@ -36,62 +34,44 @@ export default class LanguageSelector extends React.Component {
          });
     }
 
-    toggleOpen = () => {
-        this.setState({ open: !this.state.open });
-    }
-
     render() {
         return (
             <LanguageContext.Consumer>
                 {({ language, setLanguage, setLanguageIndex }) => (
-                    <div>
-                        <div style={{
+                    <div
+                        style={{
                             position: "absolute",
+                            top: "25svh",
+                            left: "25svw",
                             display: "flex",
-                            top: "0rem",
-                            left: "0rem",
-                            width: "100svw",
-                            height: "100svh",
-                            justifyContent: "center",
-                            pointerEvents: this.state.open ? "all" : "none",
-                            alignItems: "center",
                             flexDirection: "column",
-                            zIndex: "2"
+                            alignItems: "center",
+                            backgroundColor: Colors.GlassPanel(),
+                            backdropFilter: "blur(10px)",
+                            border: "1px solid " + Colors.GlassPanelBorder(),
+                            borderRadius: "1rem",
+                            padding: "1rem",
+                            width: "50svw",
+                            height: "50svh",
+                            gap: "1rem"
                         }}>
-                            <div
-                                style={{
-                                    display: this.state.open ? "flex" : "none",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    backgroundColor: Colors.GlassPanel(),
-                                    backdropFilter: "blur(10px)",
-                                    border: "1px solid " + Colors.GlassPanelBorder(),
-                                    borderRadius: "1rem",
-                                    padding: "1rem",
-                                    width: "50svw",
-                                    height: "50svh",
-                                    gap: "1rem"
-                                }}>
-                                <h2>{Strings.ChooseLanguage(language)}</h2>
-                                <div
-                                    style={{
-                                        height: "100%",
-                                        display: "flex",
-                                        justifyContent: "space-evenly",
-                                        flexDirection: "column",
-                                    }}>
-                                    {this.state.languages.map((lang, index) => (
-                                        <Button key={lang.language} label={lang.display} onClick={() => {
-                                            localStorage.setItem("language", lang.language);
-                                            setLanguage(lang.language);
-                                            setLanguageIndex(index);
-                                            this.toggleOpen();
-                                        }}/>
-                                    ))}
-                                </div>
-                            </div>
+                        <h2>{Strings.ChooseLanguage(language)}</h2>
+                        <div
+                            style={{
+                                height: "100%",
+                                display: "flex",
+                                justifyContent: "space-evenly",
+                                flexDirection: "column",
+                            }}>
+                            {this.state.languages.map((lang, index) => (
+                                <Button key={lang.language} label={lang.display} onClick={() => {
+                                    localStorage.setItem("language", lang.language);
+                                    setLanguage(lang.language);
+                                    setLanguageIndex(index);
+                                }}/>
+                            ))}
                         </div>
-                        <LanguageSelectorButton onClick={this.toggleOpen} />
+                        <Button type="close" onClick={this.props.close} />
                     </div>
                 )}
             </LanguageContext.Consumer>

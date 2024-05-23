@@ -4,11 +4,15 @@ export default class Colors {
     static avatarColorsLength = 11;
 
     static Background() {
-        return dark ? "#1F1F1F" : "#E8E8E8";
+        return dark ? "#1F1F1F" : "#F8F8F8";
     }
 
     static OffsetBackground() {
-        return dark ? "#2A2A2A" : "#D8D8D8";
+        return dark ? "#2A2A2A" : "#E8E8E8";
+    }
+
+    static ButtonBackground() {
+        return dark ? "none" : "#F8F8F8";
     }
 
     static Text() {
@@ -79,11 +83,11 @@ export default class Colors {
     }
     
     static GlassPanel() {
-        return dark ? "#35353580" : "#D8D8D880";
+        return dark ? "#35353580" : "#E8E8E880";
     }
 
     static GlassPanelBorder() {
-        return dark ? "#1C1C1C" : "#C8C8C8";
+        return dark ? "#1C1C1C" : "#A8A8A8";
     }
 
     static UpdateDarkMode() {

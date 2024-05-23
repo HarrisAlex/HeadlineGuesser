@@ -98,6 +98,7 @@ export default class AvatarEditor extends React.Component {
                 top: "20svh",
                 left: "20svw",
                 backgroundColor: Colors.GlassPanel(),
+                border: "1px solid " + Colors.GlassPanelBorder(),
                 backdropFilter: "blur(10px)",
                 display: "flex",
                 justifyContent: "space-around",

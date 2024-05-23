@@ -14,6 +14,7 @@ import Profile from './pages/profile.jsx';
 import NavBar from './components/navBar.jsx';
 import DarkModeToggle from './components/darkModeToggle.jsx';
 import LanguageSelector from './components/languageSelector.jsx';
+import LanguageSelectorButton from './components/languageSelectorButton.jsx';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -40,10 +41,11 @@ export default class App extends React.Component {
   }
 
   handleLanguageSelectButton = () => {
-    this.setState({ languageSelectWindowOpen: !this.state.languageSelectWindowOpen });
+    this.setState({ languageSelectWindowOpen: true });
   }
 
   render() {
+    const languageSelector = this.state.languageSelectWindowOpen ? <LanguageSelector open={this.state.languageSelectWindowOpen} close={() => { this.setState({ languageSelectWindowOpen: false })}}/> : null;
     return (
       <main style={{
         backgroundColor: Colors.Background(),
@@ -63,7 +65,8 @@ export default class App extends React.Component {
             </Routes>
             </Router>
             <DarkModeToggle onClick={this.handleDarkModeToggle} />
-            <LanguageSelector />
+            {languageSelector}
+            <LanguageSelectorButton onClick={this.handleLanguageSelectButton} />
         </LanguageProvider>
       </main>
     );
