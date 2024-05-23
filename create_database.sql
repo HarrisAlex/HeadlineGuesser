@@ -198,7 +198,7 @@ BEGIN
     SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE EMAIL = input_email;
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER');
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER', NULL, NULL);
     ELSE
         -- Get user id and salt
         SELECT ID, SALT INTO userID, userSalt FROM USER_LOGIN WHERE EMAIL = input_email;
@@ -206,7 +206,7 @@ BEGIN
 
         -- Check if password is valid
         IF hashsedPass != (SELECT PASS FROM USER_LOGIN WHERE ID = userID) THEN
-            INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER');
+            INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER', NULL, NULL);
         ELSE
             -- Check for existing token
             IF (SELECT COUNT(*) FROM TOKEN_TABLE WHERE ID = userID AND EXPIRATION_DATE > NOW()) > 0 THEN

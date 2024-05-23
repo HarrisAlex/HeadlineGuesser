@@ -91,9 +91,10 @@ export default class Button extends React.Component {
                 onFocus={this.handleFocus}
                 onBlur={this.handleBlur}
                 onClick={() => {
-                    this.props.onClick();
+                    if (this.props.onClick)
+                        this.props.onClick();
                 }}
-                {...this.props}>{text}</button>
+                {...this.props}>{this.props.children}{text}</button>
         );
     }
 }

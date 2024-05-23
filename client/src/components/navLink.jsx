@@ -42,7 +42,7 @@ export default class NavLink extends React.Component {
                     cursor: "pointer",
                 }}
                 {...this.props}>
-                {this.props.destination}
+                {this.props.destination}{this.props.children}
             </a>
         );
     }

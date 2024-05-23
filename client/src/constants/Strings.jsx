@@ -71,6 +71,30 @@ export default class Strings {
         }
     }
 
+    static Settings(language) {
+        switch (language) {
+            case "spanish":
+                return "Ajustes";
+            case "french":
+                return "Paramètres";
+            case "english":
+            default:
+                return "Settings";
+        }
+    }
+
+    static Logout(language) {
+        switch (language) {
+            case "spanish":
+                return "Cerrar Sesión";
+            case "french":
+                return "Se Déconnecter";
+            case "english":
+            default:
+                return "Log Out";
+        }
+    }
+
     static Rank(language) {
         switch (language) {
             case "spanish":
