@@ -7,6 +7,7 @@ import Link from '../components/link.jsx';
 import Strings from '../constants/Strings.jsx';
 import Colors from '../constants/Colors.jsx';
 import Avatar from '../components/avatar.jsx';
+import AvatarEditor from '../components/avatarEditor.jsx';
 
 export default class Profile extends React.Component {
     constructor (props) {
@@ -192,6 +193,7 @@ export default class Profile extends React.Component {
                             </ul>
                         </section>
                     </section>
+                    <AvatarEditor />
                 </div>
             )}
             </LanguageContext.Consumer>
