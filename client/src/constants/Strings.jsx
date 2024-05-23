@@ -330,6 +330,18 @@ export default class Strings {
         }
     };
 
+    static AvatarEditor(language) {
+        switch (language) {
+            case "spanish":
+                return "Editor de Avatar";
+            case "french":
+                return "Éditeur d'Avatar";
+            case "english":
+            default:
+                return "Avatar Editor";
+        }
+    };
+
     static EditAvatar(language) {
         switch (language) {
             case "spanish":

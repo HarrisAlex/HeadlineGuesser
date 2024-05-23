@@ -4,8 +4,8 @@ import { LanguageContext } from '../contexts/LanguageContext.js';
 
 import Button from './button.jsx';
 
+import Modal from './modal.jsx';
 import Strings from '../constants/Strings.jsx';
-import Colors from '../constants/Colors.jsx';
 
 export default class LanguageSelector extends React.Component {
     static contextType = LanguageContext;
@@ -38,24 +38,7 @@ export default class LanguageSelector extends React.Component {
         return (
             <LanguageContext.Consumer>
                 {({ language, setLanguage, setLanguageIndex }) => (
-                    <div
-                        style={{
-                            position: "absolute",
-                            top: "25svh",
-                            left: "25svw",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            backgroundColor: Colors.GlassPanel(),
-                            backdropFilter: "blur(10px)",
-                            border: "1px solid " + Colors.GlassPanelBorder(),
-                            borderRadius: "1rem",
-                            padding: "1rem",
-                            width: "50svw",
-                            height: "50svh",
-                            gap: "1rem"
-                        }}>
-                        <h2>{Strings.ChooseLanguage(language)}</h2>
+                    <Modal close={this.props.close} header={Strings.ChooseLanguage(language)}>
                         <div
                             style={{
                                 height: "100%",
@@ -71,8 +54,7 @@ export default class LanguageSelector extends React.Component {
                                 }}/>
                             ))}
                         </div>
-                        <Button type="close" onClick={this.props.close} />
-                    </div>
+                    </Modal>
                 )}
             </LanguageContext.Consumer>
         );

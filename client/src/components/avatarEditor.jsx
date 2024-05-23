@@ -1,7 +1,11 @@
 import React from 'react';
 
+import { LanguageContext } from '../contexts/LanguageContext.js';
+
+import Strings from '../constants/Strings.jsx';
 import Colors from '../constants/Colors.jsx';
 
+import Modal from './modal.jsx';
 import Button from './button.jsx';
 import Avatar from './avatar.jsx';
 
@@ -91,45 +95,35 @@ export default class AvatarEditor extends React.Component {
         }
 
         return (
-            <div style={{
-                width: "60svw",
-                height: "60svh",
-                position: "absolute",
-                top: "20svh",
-                left: "20svw",
-                backgroundColor: Colors.GlassPanel(),
-                border: "1px solid " + Colors.GlassPanelBorder(),
-                backdropFilter: "blur(10px)",
-                display: "flex",
-                justifyContent: "space-around",
-                alignItems: "center",
-            }}>
-                <Avatar colors={{ background: this.state.colors.background, border: this.state.colors.border, foreground: this.state.colors.foreground }} foreground={this.state.foreground} width="25svh" height="25svh" />
-                <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "1rem"                
-                }}>
+            <LanguageContext.Consumer>
+                {(language) => (
+                    <Modal close={this.props.close} header={Strings.AvatarEditor(language)}>
+                    <Avatar colors={{ background: this.state.colors.background, border: this.state.colors.border, foreground: this.state.colors.foreground }} foreground={this.state.foreground} width="25svh" height="25svh" />
                     <div style={{
                         display: "flex",
                         flexDirection: "column",
-                        gap: "1rem"
+                        gap: "1rem"                
                     }}>
-                        <Button label="Change Foreground" onClick={this.changeForeground} />
-                        <Button label="Change Background Color" onClick={this.changeBackgroundColor} />
-                        <Button label="Change Border Color" onClick={this.changeBorderColor} />
-                        <Button label="Change Foreground Color" onClick={this.changeForegroundColor} />
+                        <div style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "1rem"
+                        }}>
+                            <Button label="Change Foreground" onClick={this.changeForeground} />
+                            <Button label="Change Background Color" onClick={this.changeBackgroundColor} />
+                            <Button label="Change Border Color" onClick={this.changeBorderColor} />
+                            <Button label="Change Foreground Color" onClick={this.changeForegroundColor} />
+                        </div>
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: "1rem"
+                        }}>
+                            <Button label="Save Avatar" onClick={this.saveAvatar} />
+                        </div>
                     </div>
-                    <div style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        gap: "1rem"
-                    }}>
-                        <Button label="Save Avatar" onClick={this.saveAvatar} />
-                    </div>
-                </div>
-                <Button type="close" onClick={this.props.close} />
-            </div>
+                </Modal>)}
+            </LanguageContext.Consumer>
         );
     }
 }

@@ -79,6 +79,8 @@ export default class Colors {
                 return "#000000";
             case 10:
                 return "#808080";
+            default:
+                return "#FFFFFF";
         }
     }
     
@@ -87,7 +89,7 @@ export default class Colors {
     }
 
     static GlassPanelBorder() {
-        return dark ? "#1C1C1C" : "#A8A8A8";
+        return dark ? "#3C3C3C" : "#A8A8A8";
     }
 
     static UpdateDarkMode() {
