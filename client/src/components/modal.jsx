@@ -17,13 +17,15 @@ export default class Modal extends React.Component {
                 backdropFilter: "blur(10px)",
             }}>
                 <div style={{
-                    backgroundColor: Colors.Background(),
+                    backgroundColor: Colors.GlassPanel(),
                     width: "100%",
-                    height: "2rem",
+                    height: "2.5rem",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                     paddingLeft: "1rem",
+                    paddingRight: "0.25rem",
+                    borderBottom: "1px solid " + Colors.GlassPanelBorder(),
                 }}>
                     <h2>{this.props.header}</h2>
                     <Button type="close" onClick={this.props.close}/>

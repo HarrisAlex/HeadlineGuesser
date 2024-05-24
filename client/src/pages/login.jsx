@@ -5,6 +5,7 @@ import Colors from '../constants/Colors.jsx';
 import TextBox from '../components/textBox.jsx';
 import Button from '../components/button.jsx';
 import { LanguageContext } from '../contexts/LanguageContext.js';
+import Transitions from '../constants/Transitions.jsx';
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -26,6 +27,7 @@ export default class Login extends React.Component {
         const name = target.name;
 
         this.setState({ [name]: value });
+        this.setState({ error: "" });
     }
 
     handleSubmit(event) {
@@ -46,9 +48,10 @@ export default class Login extends React.Component {
             // Check for successful response
             if (data.status === 200) {
                 data.json().then((data) => {
-                    console.log(data.token);
                     localStorage.setItem("token", data.token);
                     localStorage.setItem("username", data.username);
+
+                    window.location = "/index";
                 });
             }
             else {
@@ -94,7 +97,7 @@ export default class Login extends React.Component {
                             <TextBox name="email" label={Strings.Email(language)} type="text" autoComplete="email" required onChange={this.handleInputChange} />
                             <TextBox name="password" label={Strings.Password(language)} type="password" autoComplete="current-password" required onChange={this.handleInputChange}/>
                             <p style={{
-                                color: "red"
+                                color: "red",
                             }}>{this.state.error}</p>
                             <Button label={Strings.Login(language)} />
                         </form>

@@ -8,7 +8,7 @@ export default class Colors {
     }
 
     static OffsetBackground() {
-        return dark ? "#2A2A2A" : "#E8E8E8";
+        return dark ? "#2A2A2A" : "#EFEFEF";
     }
 
     static ButtonBackground() {

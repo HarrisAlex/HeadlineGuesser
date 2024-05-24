@@ -4,6 +4,6 @@ export default class Transitions {
     }
 
     static ProfileDropdown() {
-        return "all 0.3s ease";
+        return "all 0.3s ease-in-out";
     }
 }
