@@ -583,6 +583,39 @@ END //
 DELIMITER ;
 
 DELIMITER //
+-- EDIT USERNAME
+CREATE PROCEDURE edit_username(IN input_token CHAR(255), IN input_new_username VARCHAR(255))
+BEGIN
+    DECLARE isValid INT DEFAULT 0;
+    DECLARE userID INT;
+
+    -- Create response table
+    CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
+        RESPONSE_STATUS VARCHAR(20),
+        RESPONSE_MESSAGE VARCHAR(255)
+    );
+
+    -- Check if token is valid
+    SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
+
+    IF isValid = 0 THEN
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
+    ELSE
+        -- Get user id
+        SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
+
+        -- Update username
+        UPDATE USER_LOGIN SET USERNAME = input_new_username WHERE ID = userID;
+
+        INSERT INTO RESPONSE VALUES ('SUCCESS', 'USERNAME_UPDATED');
+    END IF;
+
+    SELECT * FROM RESPONSE;
+    DROP TEMPORARY TABLE RESPONSE;
+END //
+DELIMITER ;
+
+DELIMITER //
 -- UPDATE LEADERBOARD
 CREATE PROCEDURE update_leaderboard()
 BEGIN
