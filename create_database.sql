@@ -453,6 +453,60 @@ END //
 DELIMITER ;
 
 DELIMITER //
+-- ADD FRIEND
+CREATE PROCEDURE add_friend(IN input_token CHAR(255), IN input_friend_username VARCHAR(255))
+BEGIN
+    DECLARE isValid INT DEFAULT 0;
+    DECLARE userID INT;
+    DECLARE friendID INT;
+
+    -- Create response table
+    CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
+        RESPONSE_STATUS VARCHAR(20),
+        RESPONSE_MESSAGE VARCHAR(255)
+    );
+
+    -- Check if token is valid
+    SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token;
+
+    IF isValid = 0 THEN
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
+    ELSE
+        -- Get user id
+        SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
+
+        -- Check if friend exists
+        SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE USERNAME = input_friend_username;
+
+        IF isValid = 0 THEN
+            INSERT INTO RESPONSE VALUES ('ERROR', 'NONEXISTENT_USER');
+        ELSE
+            -- Get friend id
+            SELECT ID INTO friendID FROM USER_LOGIN WHERE USERNAME = input_friend_username;
+
+            -- Check if friend is already added
+            SELECT COUNT(*) INTO isValid FROM FRIENDS WHERE ID = userID AND FRIEND = friendID;
+
+            IF isValid > 0 THEN
+                INSERT INTO RESPONSE VALUES ('ERROR', 'ALREADY_FRIENDS');
+            ELSE
+                IF userID = friendID THEN
+                    INSERT INTO RESPONSE VALUES ('ERROR', 'CANNOT_FRIEND_SELF');
+                ELSE
+                    -- Add friend
+                    INSERT INTO FRIENDS VALUES (userID, friendID);
+                    INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIEND_ADDED');
+                END IF;
+            END IF;
+        END IF;
+    END IF;
+
+    SELECT * FROM RESPONSE;
+    DROP TEMPORARY TABLE RESPONSE;
+END //
+DELIMITER ;
+
+DELIMITER //
 -- GET FRIENDS
 CREATE PROCEDURE get_friends(IN input_username VARCHAR(255))
 BEGIN
@@ -497,8 +551,12 @@ BEGIN
             -- Get friend username
             SELECT USERNAME INTO friendUsername FROM USER_LOGIN WHERE ID = friendID;
 
-            -- Insert friend into response table
-            INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIEND_FOUND', friendUsername);
+            -- Check if mutual friends
+            SELECT COUNT(*) INTO isValid FROM FRIENDS WHERE ID = friendID AND FRIEND = userID;
+
+            IF isValid > 0 THEN
+                INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIEND_FOUND', friendUsername);
+            END IF;
         END LOOP;
 
         CLOSE friendCursor;
