@@ -55,20 +55,6 @@ export default class NavBar extends React.Component {
             profileColor = Colors.Accent(2);
         }
 
-        // const dropdownElementStyle = { 
-        //     width: "100%",
-        //     paddingTop: "0.25rem",
-        //     paddingBottom: "calc(0.25rem + 2px)",
-        // }
-
-        // const dropdownElementMiddleStyle = {
-        //     ...dropdownElementStyle,
-        //     borderBottomStyle: "solid",
-        //     borderBottomColor: Colors.GlassPanelBorder(), 
-        //     borderBottomWidth: "1px", 
-        //     paddingBottom: "0.25rem"
-        // }
-
         const profileLink = localStorage.getItem("username") !== null ? "profile?user=" + localStorage.getItem("username") : "login";
         const signedIn = localStorage.getItem("token") !== null;
 

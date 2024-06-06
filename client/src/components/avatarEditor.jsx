@@ -85,7 +85,17 @@ export default class AvatarEditor extends React.Component {
             if (data.status === 200) {
                 // Avatar saved
                 window.location.reload();
-            } 
+            } else if (data.status === 400) {
+                data.json().then((data) => {
+                    // Check error type
+                    if (data.message === "INVALID_TOKEN") {
+                        // Invalid token
+                        localStorage.removeItem("token");
+                        localStorage.removeItem("username");
+                        window.location = "/index";
+                    }
+                });
+            }
         });
     }
 

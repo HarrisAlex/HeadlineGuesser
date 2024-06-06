@@ -42,7 +42,6 @@ export default class TextBox extends React.Component {
                     top: "-0.75rem",
                     left: "0.75rem",
                     zIndex: "1",
-
                 }}>{this.props.label}</label>
                 <input onFocus={this.handleFocus} onBlur={this.handleBlur} id={this.props.label} style={{
                     position: "relative",
