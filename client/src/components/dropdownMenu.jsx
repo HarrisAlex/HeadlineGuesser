@@ -73,12 +73,12 @@ export default class DropdownMenu extends React.Component {
                     textAlign: "center",
                     width: "100%",
                 }}>
-                    {this.props.children.map((child, index) => {
+                    {this.props.children.length > 1 ? this.props.children.map((child, index) => {
                         if (index < this.props.children.length - 1) 
                             return <span key={index} style={dropdownElementMiddleStyle}>{child}</span>
                         else
                             return <span key={index} style={dropdownElementStyle}>{child}</span>
-                    })}
+                    }) : <span style={dropdownElementStyle}>{this.props.children}</span>}
                 </div>}
             </div>
         );

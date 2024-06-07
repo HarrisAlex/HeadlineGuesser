@@ -19,6 +19,8 @@ export default class NavBar extends React.Component {
         this.handleLeaderboardHover = this.handleLeaderboardHover.bind(this);
         this.handleLeaderboardUnhover = this.handleLeaderboardUnhover.bind(this);
         this.handleLogout = this.handleLogout.bind(this);
+        this.handleLogin = this.handleLogin.bind(this);
+        this.handleSignup = this.handleSignup.bind(this);
 
         this.state = {
             activePage: window.location.pathname.split("/")[1],
@@ -49,6 +51,14 @@ export default class NavBar extends React.Component {
         window.location = "/index";
     }
 
+    handleLogin() {
+        window.location = "/login";
+    }
+
+    handleSignup() {
+        window.location = "/signup";
+    }
+
     render() {
         let profileColor = this.state.profileDropdownOpen ? Colors.Accent(1) : Colors.Text();
         if (this.state.profileFocused) {
@@ -56,7 +66,7 @@ export default class NavBar extends React.Component {
         }
 
         const profileLink = localStorage.getItem("username") !== null ? "profile?user=" + localStorage.getItem("username") : "login";
-        const signedIn = localStorage.getItem("token") !== null;
+        const signedIn = localStorage.getItem("token") !== null && localStorage.getItem("username") !== null;
 
         return (
             <LanguageContext.Consumer>
@@ -88,6 +98,7 @@ export default class NavBar extends React.Component {
                                 <NavLink href={"leaderboard?leaderboard=streaks_leaderboard"} destination={Strings.Leaderboard(language)} />
                             </DropdownMenu>
                         </div>
+                        { signedIn ? 
                         <DropdownMenu icon={<ProfileIcon style={{
                             stroke: profileColor,
                             strokeWidth: "1.5rem",
@@ -98,6 +109,17 @@ export default class NavBar extends React.Component {
                             <NavLink href={"settings"} destination={Strings.Settings(language)} />
                             <NavLink onClick={this.handleLogout} destination={Strings.Logout(language)} />
                         </DropdownMenu>
+                        :
+                        <DropdownMenu icon={<ProfileIcon style={{
+                            stroke: profileColor,
+                            strokeWidth: "1.5rem",
+                            height: "2.75rem",
+                            transition: Transitions.Hover(),
+                        }} />} href={profileLink} onHover={this.handleProfileHover} onUnhover={this.handleProfileUnhover} >
+                            <NavLink onClick={this.handleSignup} destination={Strings.Signup(language)} />
+                            <NavLink onClick={this.handleLogin} destination={Strings.Login(language)} />
+                        </DropdownMenu>
+                        }
                     </nav>
                 )}
             </LanguageContext.Consumer>
