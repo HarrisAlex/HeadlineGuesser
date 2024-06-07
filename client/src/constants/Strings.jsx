@@ -378,6 +378,45 @@ export default class Strings {
         }
     }
 
+    static AddFriend(language) {
+        switch (language) {
+            case "spanish":
+                return "Añadir Amigo";
+            case "french":
+                return "Ajouter un Ami";
+            case "english":
+            default:
+                return "Add Friend";
+        }
+    }
+
+    static FriendStatus(status, language) {
+        switch (status) {
+            case "ALREADY_FRIENDS":
+                switch (language) {
+                    case "spanish":
+                        return "Amigos";
+                    case "french":
+                        return "Amis";
+                    case "english":
+                    default:
+                        return "Friends";
+                }
+            case "FRIEND_REQUEST_SENT":
+                switch (language) {
+                    case "spanish":
+                        return "Solicitud de amistad enviada";
+                    case "french":
+                        return "Demande d'ami envoyée";
+                    case "english":
+                    default:
+                        return "Friend Request Sent";
+                }
+            default:
+                return "";
+        }
+    }
+
     static ChooseLanguage(language) {
         switch (language) {
             case "spanish":

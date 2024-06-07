@@ -15,6 +15,7 @@ export default class Profile extends React.Component {
         super(props);
 
         this.openAvatarEditor = this.openAvatarEditor.bind(this);
+        this.addFriend = this.addFriend.bind(this);
 
         this.state = {
             username: "user",
@@ -49,6 +50,7 @@ export default class Profile extends React.Component {
                 },
                 foreground: 0
             },
+            friendStatus: false,
         }
     }
 
@@ -142,10 +144,55 @@ export default class Profile extends React.Component {
                 });
             }
         });
+
+        if (localStorage.getItem("username") === user 
+            || localStorage.getItem("username") === null 
+            || localStorage.getItem("token") === null) {
+            return;
+        }
+
+        // Get friend status
+        fetch("/api/get_friend_status", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                token: localStorage.getItem("token"),
+                username: user
+            })
+        }).then((data) => {
+            // Check for successful response
+            if (data.status === 200) {
+                data.json().then((data) => {
+                    // Set friend status
+                    this.setState({ friendStatus: data.message });
+                });
+            }
+        });
     }
 
     openAvatarEditor() {
         this.setState({ avatarEditorOpen: true });
+    }
+
+    addFriend() {
+        const user = new URLSearchParams(window.location.search).get("user");
+        fetch("/api/add_friend", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                token: localStorage.getItem("token"),
+                username: user
+            })
+        }).then((data) => {
+            // Check for successful response
+            if (data.status === 200) {
+                window.location.reload();
+            }
+        });
     }
 
     render () {
@@ -161,7 +208,7 @@ export default class Profile extends React.Component {
         const urlParams = new URLSearchParams(window.location.search);
         const user = urlParams.get("user");
 
-        const avatarEditor = this.state.avatarEditorOpen ? <AvatarEditor colors={ this.state.avatar.colors } foreground={ this.state.avatar.foreground } open={this.state.avatarEditorOpen} close={() => this.setState({ avatarEditorOpen: false })}/> : null;
+        const avatarEditor = this.state.avatarEditorOpen ? <AvatarEditor colors={ this.state.avatar.colors } foreground={ this.state.avatar.foreground } open={this.state.avatarEditorOpen} close={() => this.setState({ avatarEditorOpen: false })}/> : null;        
 
         return (
             <LanguageContext.Consumer>
@@ -187,6 +234,8 @@ export default class Profile extends React.Component {
                             border: this.state.avatar.colors.border, 
                             foreground: this.state.avatar.colors.foreground }} foreground={this.state.avatar.foreground} width="25svh" height="25svh" />
                         {localStorage.getItem("username") === user ? <Button label={Strings.EditAvatar(language)} onClick={this.openAvatarEditor} /> : null}
+                        {localStorage.getItem("username") !== user && this.state.friendStatus === "FRIEND_REQUEST_NOT_SENT" ? <Button label={Strings.AddFriend(language)} onClick={this.addFriend} /> : null}
+                        {localStorage.getItem("username") !== user && this.state.friendStatus !== "FRIEND_REQUEST_NOT_SENT" ? <p>{Strings.FriendStatus(this.state.friendStatus, language)}</p> : null}
                         <p>{Strings.DateJoined(language)}: {this.state.dateJoined}</p>
                         <p>{Strings.Level(language)}: {this.state.level}</p>
                     </section>

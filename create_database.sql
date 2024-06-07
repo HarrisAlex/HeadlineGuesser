@@ -488,7 +488,9 @@ BEGIN
             SELECT COUNT(*) INTO isValid FROM FRIENDS WHERE ID = userID AND FRIEND = friendID;
 
             IF isValid > 0 THEN
-                INSERT INTO RESPONSE VALUES ('ERROR', 'ALREADY_FRIENDS');
+                SELECT COUNT(*) INTO isValid FROM FRIENDS WHERE ID = friendID AND FRIEND = userID;
+                
+                INSERT INTO RESPONSE VALUES ('ERROR', 'FRIEND_ALREADY_ADDED');
             ELSE
                 IF userID = friendID THEN
                     INSERT INTO RESPONSE VALUES ('ERROR', 'CANNOT_FRIEND_SELF');
@@ -496,6 +498,64 @@ BEGIN
                     -- Add friend
                     INSERT INTO FRIENDS VALUES (userID, friendID);
                     INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIEND_ADDED');
+                END IF;
+            END IF;
+        END IF;
+    END IF;
+
+    SELECT * FROM RESPONSE;
+    DROP TEMPORARY TABLE RESPONSE;
+END //
+DELIMITER ;
+
+DELIMITER //
+-- FRIEND REQUEST SENT
+CREATE PROCEDURE get_friend_status(IN input_token CHAR(255), IN input_friend_username VARCHAR(255))
+BEGIN
+    DECLARE isValid INT DEFAULT 0;
+    DECLARE userID INT;
+    DECLARE friendID INT;
+
+    -- Create response table
+    CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
+        RESPONSE_STATUS VARCHAR(20),
+        RESPONSE_MESSAGE VARCHAR(255)
+    );
+
+    -- Check if token is valid
+    SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token;
+
+    IF isValid = 0 THEN
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
+    ELSE
+        -- Get user id
+        SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
+
+        -- Check if friend exists
+        SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE USERNAME = input_friend_username;
+
+        IF isValid = 0 THEN
+            INSERT INTO RESPONSE VALUES ('ERROR', 'NONEXISTENT_USER');
+        ELSE
+            -- Get friend id
+            SELECT ID INTO friendID FROM USER_LOGIN WHERE USERNAME = input_friend_username;
+
+            -- Check if friend is already added
+            SELECT COUNT(*) INTO isValid FROM FRIENDS WHERE ID = userID AND FRIEND = friendID;
+
+            IF isValid > 0 THEN
+                SELECT COUNT(*) INTO isValid FROM FRIENDS WHERE ID = friendID AND FRIEND = userID;
+
+                IF isValid > 0 THEN
+                    INSERT INTO RESPONSE VALUES ('SUCCESS', 'ALREADY_FRIENDS');
+                ELSE
+                    INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIEND_REQUEST_SENT');
+                END IF;
+            ELSE
+                IF userID = friendID THEN
+                    INSERT INTO RESPONSE VALUES ('ERROR', 'CANNOT_FRIEND_SELF');
+                ELSE
+                    INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIEND_REQUEST_NOT_SENT');
                 END IF;
             END IF;
         END IF;

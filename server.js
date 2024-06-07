@@ -299,6 +299,39 @@ app.post("/api/add_friend", (req, res) => {
 });
 
 // +==================================+
+// |      Friend Request Sent API     |
+// +==================================+
+// Incoming: { token, username }
+// Outgoing: { status, friendRequestSent }
+app.post("/api/get_friend_status", (req, res) => {
+    const { token, username } = req.body;
+
+    if (!token || !username) {
+        return res.status(400).json({ message: responseCodes.missingInput });
+    }
+
+    const data = sanitizeData({ token, username });
+
+    const sql = "CALL get_friend_status(?, ?)";
+    const params = [data.token, data.username];
+
+    db.query(sql, params, function(err, result) {
+        if (err) {
+            console.log(`SQL database error ${err}`);
+            return res.status(500).json({ message: responseCodes.serverError });
+        }
+
+        const response = result[0][0];
+
+        if (response.RESPONSE_STATUS === "ERROR") {
+            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        }
+
+        return res.status(200).json({ message: response.RESPONSE_MESSAGE });
+    });
+});
+
+// +==================================+
 // |         Get Friends API          |
 // +==================================+
 // Incoming: { username }
