@@ -20,6 +20,12 @@ export default class Login extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
+    componentDidMount() {
+        const urlErrorParam = new URLSearchParams(window.location.search).get("error");
+
+        this.setState({ error: urlErrorParam });
+    }
+
     handleInputChange(event) {
         // Get input name and value from element
         const target = event.target;
@@ -56,8 +62,7 @@ export default class Login extends React.Component {
             }
             else {
                 data.json().then((data) => {
-                    const message = Strings.UserBackendResponse(data.message, localStorage.getItem("language"));
-                    this.setState({ error: message });
+                    this.setState({ error: data.message });
                 });
             }
         });
@@ -98,7 +103,7 @@ export default class Login extends React.Component {
                             <TextBox name="password" label={Strings.Password(language)} type="password" autoComplete="current-password" required onChange={this.handleInputChange}/>
                             <p style={{
                                 color: "red",
-                            }}>{this.state.error}</p>
+                            }}>{Strings.LoginError(this.state.error, language)}</p>
                             <Button label={Strings.Login(language)} />
                         </form>
                     </div>

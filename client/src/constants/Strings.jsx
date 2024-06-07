@@ -429,7 +429,7 @@ export default class Strings {
         }
     }
 
-    static UserBackendResponse(response, language) {
+    static LoginError(response, language) {
         switch (response) {
             case "EMAIL_EXISTS":
                 switch (language) {
@@ -470,6 +470,16 @@ export default class Strings {
                     case "english":
                     default:
                         return "Invalid email and password combination";
+                }
+            case "INVALID_TOKEN":
+                switch (language) {
+                    case "spanish":
+                        return "Por favor, inicia sesión de nuevo";
+                    case "french":
+                        return "Veuillez vous reconnecter";
+                    case "english":
+                        return "Please sign in again";
+                    default:
                 }
             default:
                 return response;

@@ -92,7 +92,7 @@ export default class AvatarEditor extends React.Component {
                         // Invalid token
                         localStorage.removeItem("token");
                         localStorage.removeItem("username");
-                        window.location = "/index";
+                        window.location = "/index?error=INVALID_TOKEN";
                     }
                 });
             }

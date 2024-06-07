@@ -48,7 +48,7 @@ export default class NavBar extends React.Component {
     handleLogout() {
         localStorage.removeItem("token");
         localStorage.removeItem("username");
-        window.location = "/index";
+        window.location = "/index?";
     }
 
     handleLogin() {

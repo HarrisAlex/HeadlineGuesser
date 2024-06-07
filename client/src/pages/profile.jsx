@@ -196,7 +196,7 @@ export default class Profile extends React.Component {
                     if (data.message === "INVALID_TOKEN") {
                         localStorage.removeItem("token");
                         localStorage.removeItem("username");
-                        window.location = "/login";
+                        window.location = "/login?error=INVALID_TOKEN";
                     }
                 });
             }
