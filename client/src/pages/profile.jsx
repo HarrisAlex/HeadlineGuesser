@@ -191,6 +191,14 @@ export default class Profile extends React.Component {
             // Check for successful response
             if (data.status === 200) {
                 window.location.reload();
+            } else if (data.status === 400) {
+                data.json().then((data) => {
+                    if (data.message === "INVALID_TOKEN") {
+                        localStorage.removeItem("token");
+                        localStorage.removeItem("username");
+                        window.location = "/login";
+                    }
+                });
             }
         });
     }
