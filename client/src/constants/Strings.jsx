@@ -83,6 +83,18 @@ export default class Strings {
         }
     }
 
+    static EditUsername(language) {
+        switch (language) {
+            case "spanish":
+                return "Editar Nombre de Usuario";
+            case "french":
+                return "Modifier le Nom d'Utilisateur";
+            case "english":
+            default:
+                return "Edit Username";
+        }
+    }
+
     static Logout(language) {
         switch (language) {
             case "spanish":

@@ -2,6 +2,18 @@ const express = require('express');
 const app = express();
 const port = 3100;
 
+const nodemailer = require('nodemailer');
+
+const mailTransporter = nodemailer.createTransport({
+    host: "minervacg.com.alexharris.design",
+    port: "465",
+    secure: true,
+    auth: {
+        user: "admin@minervacg.com.alexharris.design",
+        pass: "e,dh{xQI40?~"
+    }
+});
+
 const questionBank = require("./questionBank.json");
 const languages = require("./languages.json").languages;
 
@@ -461,6 +473,54 @@ app.post("/api/edit_username", (req, res) => {
         return res.status(200).json({ message: response.RESPONSE_MESSAGE });
     });
 });
+
+// +==================================+
+// |    Request Edit Username API     |
+// +==================================+
+// Incoming: { token }
+// Outgoing: { status }
+app.post("/api/request_edit_username", (req, res) => {
+    const { token } = req.body;
+
+    const data = sanitizeData({ token });
+
+    const sql = "CALL request_edit_username(?)";
+    const params = [data.token];
+
+    db.query(sql, params, function(err, result) {
+        if (err) {
+            console.log(`SQL database error ${err}`);
+            console.log(result[0]);
+            return res.status(500).json({ message: responseCodes.serverError });
+        }
+
+        const response = result[0][0];
+
+        if (response.RESPONSE_STATUS === "ERROR") {
+            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        }
+
+        sendEmail(
+            "Admin <minervacg.com.alexharris.design", 
+            response.EMAIL,
+            "Username Change Request",
+            "Your username change request has been received. Please allow up to 24 hours for the change to be processed."
+        );
+
+        return res.status(200).json({ message: response.RESPONSE_MESSAGE });
+    });    
+});
+
+async function sendEmail(from, to, subject, message) {
+    const info = await mailTransporter.sendMail({
+        from: from,
+        to: to,
+        subject: subject,
+        text: message
+    });
+
+    console.log("Email sent: " + info.messageId);
+}
 
 function sanitizeData(data) {
     if (typeof(data) === "string") {

@@ -5,7 +5,6 @@ import Colors from '../constants/Colors.jsx';
 import TextBox from '../components/textBox.jsx';
 import Button from '../components/button.jsx';
 import { LanguageContext } from '../contexts/LanguageContext.js';
-import Transitions from '../constants/Transitions.jsx';
 
 export default class Login extends React.Component {
     constructor(props) {
