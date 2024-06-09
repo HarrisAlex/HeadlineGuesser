@@ -5,8 +5,8 @@ const port = 3100;
 const nodemailer = require('nodemailer');
 
 const mailTransporter = nodemailer.createTransport({
-    host: "minervacg.com.alexharris.design",
-    port: "465",
+    host: "server166.web-hosting.com",
+    port: 465,
     secure: true,
     auth: {
         user: "admin@minervacg.com.alexharris.design",
@@ -96,7 +96,7 @@ app.post("/api/login", (req, res) => {
 // |            Signup API            |
 // +==================================+
 // Incoming: { username, pass }
-// Outgoing: { status, message }
+// Outgoing: { status, message, username, token }
 app.post("/api/signup", (req, res) => {
     const { email, username, pass } = req.body;
 
@@ -121,7 +121,7 @@ app.post("/api/signup", (req, res) => {
             return res.status(400).json({ message: response.RESPONSE_MESSAGE });
         }
 
-        return res.status(200).json({ message: responseCodes.signupSuccess, token: response.RESPONSE_MESSAGE });
+        return res.status(200).json({ message: responseCodes.signupSuccess, token: response.RESPONSE_MESSAGE, username: response.USERNAME });
     });
 });
 
@@ -446,17 +446,51 @@ app.get("/api/get_avatar", (req, res) => {
 });
 
 // +==================================+
+// |            Verify API            |
+// +==================================+
+// Incoming: { token, code }
+// Outgoing: { status, sensitiveToken }
+app.post("/api/verify", (req, res) => {
+    const { token, code } = req.body;
+
+    if (!token || !code) {
+        return res.status(400).json({ message: responseCodes.missingInput });
+    }
+
+    const data = sanitizeData({ token, code });
+
+    const sql = "CALL verify(?, ?)";
+    const params = [data.token, data.code];
+
+    db.query(sql, params, function(err, result) {
+        if (err) {
+            console.log(`SQL database error ${err}`);
+            return res.status(500).json({ message: responseCodes.serverError });
+        }
+
+        const response = result[0][0];
+
+        if (response.RESPONSE_STATUS === "ERROR") {
+            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        }
+
+        return res.status(200).json({ sensitiveToken: response.SENSITIVE_TOKEN });
+    });
+});
+
+
+// +==================================+
 // |        Edit Username API         |
 // +==================================+
-// Incoming: { token, newUsername }
+// Incoming: { sensitiveToken, newUsername }
 // Outgoing: { status }
 app.post("/api/edit_username", (req, res) => {
-    const { token, newUsername } = req.body;
+    const { sensitiveToken, newUsername } = req.body;
 
-    const data = sanitizeData({ token, newUsername });
+    const data = sanitizeData({ sensitiveToken, newUsername });
 
     const sql = "CALL edit_username(?, ?)";
-    const params = [data.token, data.newUsername];
+    const params = [data.sensitiveToken, data.newUsername];
 
     db.query(sql, params, function(err, result) {
         if (err) {
@@ -483,9 +517,10 @@ app.post("/api/request_edit_username", (req, res) => {
     const { token } = req.body;
 
     const data = sanitizeData({ token });
+    const sensitiveToken = generateNumberSequence(8);
 
-    const sql = "CALL request_edit_username(?)";
-    const params = [data.token];
+    const sql = "CALL request_edit_username(?, ?)";
+    const params = [data.token, sensitiveToken];
 
     db.query(sql, params, function(err, result) {
         if (err) {
@@ -501,10 +536,10 @@ app.post("/api/request_edit_username", (req, res) => {
         }
 
         sendEmail(
-            "Admin <minervacg.com.alexharris.design", 
+            "admin@minervacg.com.alexharris.design", 
             response.EMAIL,
             "Username Change Request",
-            "Your username change request has been received. Please allow up to 24 hours for the change to be processed."
+            "Your username change request has been received. Use the code below to change your username.\n\n" + sensitiveToken + "\n\nIf you did not request this change, please contact us immediately."
         );
 
         return res.status(200).json({ message: response.RESPONSE_MESSAGE });
@@ -543,6 +578,17 @@ function sanitizeData(data) {
     }
 
     return data;
+}
+
+function generateNumberSequence(length) {
+    let sequence = "";
+
+    for (let i = 0; i < length; i++) {
+        sequence += Math.floor(Math.random() * 10);
+    }
+
+    return sequence;
+
 }
 
 function getRandomQuestion(language) {

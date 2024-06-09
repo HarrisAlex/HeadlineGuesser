@@ -49,6 +49,7 @@ export default class Signup extends React.Component {
             if (data.status === 200) {
                 data.json().then((data) => {
                     localStorage.setItem("token", data.token);
+                    localStorage.setItem("username", data.username);
                     window.location.href = "/index";
                 });
             }

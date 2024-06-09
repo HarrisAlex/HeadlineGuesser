@@ -50,6 +50,20 @@ CREATE TABLE TOKEN_TABLE (
     FOREIGN KEY (ID) REFERENCES USER_LOGIN(ID)
 );
 
+CREATE TABLE SENSITIVE_TOKENS (
+    ID INT NOT NULL PRIMARY KEY,
+    TOKEN CHAR(255) NOT NULL,
+    EXPIRATION_DATE TIMESTAMP NOT NULL,
+    FOREIGN KEY (ID) REFERENCES USER_LOGIN(ID)
+);
+
+CREATE TABLE VERIFICATION_CODES (
+    ID INT NOT NULL PRIMARY KEY,
+    CODE CHAR(8) NOT NULL,
+    EXPIRATION_DATE TIMESTAMP NOT NULL,
+    FOREIGN KEY (ID) REFERENCES USER_LOGIN(ID)
+);
+
 CREATE TABLE LEVEL_LEADERBOARD (
     USERNAME VARCHAR(255) NOT NULL PRIMARY KEY,
     OVERALL_LEVEL INT NOT NULL
@@ -136,7 +150,8 @@ BEGIN
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
         RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255)
+        RESPONSE_MESSAGE VARCHAR(255),
+        USERNAME VARCHAR(255)
     );
 
     SELECT COUNT(*) INTO emailExists FROM USER_LOGIN WHERE EMAIL = input_email;
@@ -165,7 +180,7 @@ BEGIN
         SELECT ID INTO userID FROM USER_LOGIN WHERE EMAIL = input_email;
         INSERT INTO TOKEN_TABLE (TOKEN, EXPIRATION_DATE, ID) VALUES (tokenID, DATE_ADD(NOW(), INTERVAL 1 DAY), userID);
 
-        INSERT INTO RESPONSE VALUES ('SUCCESS', tokenID);
+        INSERT INTO RESPONSE VALUES ('SUCCESS', tokenID, input_username);
     END IF;
 
     SELECT * FROM RESPONSE;
@@ -701,8 +716,59 @@ END //
 DELIMITER ;
 
 DELIMITER //
+-- VERIFY
+CREATE PROCEDURE verify(IN input_token CHAR(255), IN input_code CHAR(8))
+BEGIN
+    DECLARE isValid INT DEFAULT 0;
+    DECLARE userID INT;
+    DECLARE sensitiveToken CHAR(255);
+
+    -- Create response table
+    CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
+        RESPONSE_STATUS VARCHAR(20),
+        RESPONSE_MESSAGE VARCHAR(255),
+        SENSITIVE_TOKEN CHAR(255)
+    );
+
+    -- Check if token is valid
+    SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
+
+    IF isValid = 0 THEN
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN', NULL);
+    ELSE
+        -- Get token ID
+        SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
+
+        -- Check if code is valid
+        SELECT COUNT(*) INTO isValid FROM VERIFICATION_CODES WHERE CODE = input_code AND EXPIRATION_DATE > NOW() AND ID = userID;
+
+        IF isValid = 0 THEN
+            INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_CODE', NULL);
+        ELSE
+            -- Delete verification code
+            DELETE FROM VERIFICATION_CODES WHERE CODE = input_code;
+
+            -- Generate sensitive token
+            SET sensitiveToken = UUID();
+
+            -- Dekete any existing sensitive tokens
+            DELETE FROM SENSITIVE_TOKENS WHERE ID = userID;
+
+            -- Insert sensitive token
+            INSERT INTO SENSITIVE_TOKENS (TOKEN, EXPIRATION_DATE, ID) VALUES (sensitiveToken, DATE_ADD(NOW(), INTERVAL 10 MINUTE), userID);
+
+            INSERT INTO RESPONSE VALUES ('SUCCESS', 'VERIFIED', sensitiveToken);
+        END IF;
+    END IF;
+
+    SELECT * FROM RESPONSE;
+    DROP TEMPORARY TABLE RESPONSE;
+END //
+DELIMITER ;
+
+DELIMITER //
 -- EDIT USERNAME
-CREATE PROCEDURE edit_username(IN input_token CHAR(255), IN input_new_username VARCHAR(255))
+CREATE PROCEDURE edit_username(IN input_sensitive_token CHAR(255), IN input_new_username VARCHAR(255))
 BEGIN
     DECLARE isValid INT DEFAULT 0;
     DECLARE userID INT;
@@ -714,16 +780,19 @@ BEGIN
     );
 
     -- Check if token is valid
-    SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
+    SELECT COUNT(*) INTO isValid FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token AND EXPIRATION_DATE > NOW();
 
     IF isValid = 0 THEN
         INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
     ELSE
         -- Get user id
-        SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
+        SELECT ID INTO userID FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token;
 
         -- Update username
         UPDATE USER_LOGIN SET USERNAME = input_new_username WHERE ID = userID;
+
+        -- Delete sensitive token
+        DELETE FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token;
 
         INSERT INTO RESPONSE VALUES ('SUCCESS', 'USERNAME_UPDATED');
     END IF;
@@ -735,7 +804,7 @@ DELIMITER ;
 
 DELIMITER //
 -- REQUEST EDIT USERNAME
-CREATE PROCEDURE request_edit_username(IN input_token CHAR(255))
+CREATE PROCEDURE request_edit_username(IN input_token CHAR(255), IN user_code CHAR(8))
 BEGIN
     DECLARE isValid INT DEFAULT 0;
     DECLARE userID INT;
@@ -752,11 +821,14 @@ BEGIN
     SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN', 'ERROR');
+        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN', NULL);
     ELSE
         -- Get user email
         SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
         SELECT EMAIL INTO userEmail FROM USER_LOGIN WHERE ID = userID;
+
+        -- Insert sensitive token
+        INSERT INTO VERIFICATION_CODES (CODE, EXPIRATION_DATE, ID) VALUES (user_code, DATE_ADD(NOW(), INTERVAL 10 MINUTE), userID);
 
         INSERT INTO RESPONSE VALUES ('SUCCESS', 'VALID_TOKEN', userEmail);
     END IF;

@@ -131,6 +131,30 @@ export default class Strings {
         }
     }
 
+    static EnterVerificationCode(language) {
+        switch (language) {
+            case "spanish":
+                return "Por favor, introduce el código de verificación";
+            case "french":
+                return "Veuillez entrer le code de vérification";
+            case "english":
+            default:
+                return "Please enter the verification code";      
+        }
+    }
+
+    static Submit(language) {
+        switch (language) {
+            case "spanish":
+                return "Enviar";
+            case "french":
+                return "Soumettre";
+            case "english":
+            default:
+                return "Submit";
+        }
+    }
+
     static NextQuestion(language) {
         switch (language) {
             case "spanish":
@@ -490,8 +514,8 @@ export default class Strings {
                     case "french":
                         return "Veuillez vous reconnecter";
                     case "english":
-                        return "Please sign in again";
                     default:
+                        return "Please sign in again";
                 }
             default:
                 return response;
