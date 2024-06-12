@@ -35,7 +35,7 @@ export default class EditUsername extends React.Component {
             })
         }).then((data) => {
             if (data.status === 200) {
-                console.log("Username changed successfully");
+                localStorage.setItem("username", this.state.username);
             } else {
                 data.json().then((data) => {
                     console.error("Username change failed: " + data.message);

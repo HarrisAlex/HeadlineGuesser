@@ -827,7 +827,10 @@ BEGIN
         SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
         SELECT EMAIL INTO userEmail FROM USER_LOGIN WHERE ID = userID;
 
-        -- Insert sensitive token
+        -- Remove any existing verification codes
+        DELETE FROM VERIFICATION_CODES WHERE ID = userID;
+
+        -- Insert verification code
         INSERT INTO VERIFICATION_CODES (CODE, EXPIRATION_DATE, ID) VALUES (user_code, DATE_ADD(NOW(), INTERVAL 10 MINUTE), userID);
 
         INSERT INTO RESPONSE VALUES ('SUCCESS', 'VALID_TOKEN', userEmail);
