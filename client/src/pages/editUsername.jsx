@@ -36,6 +36,7 @@ export default class EditUsername extends React.Component {
         }).then((data) => {
             if (data.status === 200) {
                 localStorage.setItem("username", this.state.username);
+                window.location.href = "/settings";
             } else {
                 data.json().then((data) => {
                     console.error("Username change failed: " + data.message);

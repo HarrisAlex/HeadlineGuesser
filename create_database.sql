@@ -804,7 +804,7 @@ DELIMITER ;
 
 DELIMITER //
 -- REQUEST EDIT USERNAME
-CREATE PROCEDURE request_edit_username(IN input_token CHAR(255), IN user_code CHAR(8))
+CREATE PROCEDURE request_verification(IN input_token CHAR(255), IN user_code CHAR(8))
 BEGIN
     DECLARE isValid INT DEFAULT 0;
     DECLARE userID INT;

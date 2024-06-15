@@ -14,13 +14,15 @@ export default class Settings extends React.Component {
     }
 
     handleEditUsername() {
-        fetch("/api/request_edit_username", {
+        fetch("/api/request_verification", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
                 token: localStorage.getItem("token"),
+                action: "edit_username",
+                language: localStorage.getItem("language")
             }),
         }).then((data) => {
             if (data.status === 200) {

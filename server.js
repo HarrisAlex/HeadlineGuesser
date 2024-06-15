@@ -509,18 +509,18 @@ app.post("/api/edit_username", (req, res) => {
 });
 
 // +==================================+
-// |    Request Edit Username API     |
+// |     Request Verification API     |
 // +==================================+
-// Incoming: { token }
+// Incoming: { token, action, language }
 // Outgoing: { status }
-app.post("/api/request_edit_username", (req, res) => {
-    const { token } = req.body;
+app.post("/api/request_verification", (req, res) => {
+    const { token, action, language } = req.body;
 
-    const data = sanitizeData({ token });
-    const sensitiveToken = generateNumberSequence(8);
+    const data = sanitizeData({ token, action, language });
+    const verificationCode = generateNumberSequence(8);
 
-    const sql = "CALL request_edit_username(?, ?)";
-    const params = [data.token, sensitiveToken];
+    const sql = "CALL request_verification(?, ?)";
+    const params = [data.token, verificationCode];
 
     db.query(sql, params, function(err, result) {
         if (err) {
@@ -535,26 +535,63 @@ app.post("/api/request_edit_username", (req, res) => {
             return res.status(400).json({ message: response.RESPONSE_MESSAGE });
         }
 
-        sendEmail(
-            "admin@minervacg.com.alexharris.design", 
-            response.EMAIL,
-            "Username Change Request",
-            "Your username change request has been received. Use the code below to change your username.\n\n" + sensitiveToken + "\n\nIf you did not request this change, please contact us immediately."
-        );
+        sendVerificationCodeEmail(response.EMAIL, data.language, verificationCode, data.action);
 
         return res.status(200).json({ message: response.RESPONSE_MESSAGE });
     });    
 });
 
-async function sendEmail(from, to, subject, message) {
-    const info = await mailTransporter.sendMail({
-        from: from,
-        to: to,
+async function sendVerificationCodeEmail(email, language, verificationCode, action) {
+    const { subject, message } = generateVerificationEmail(language, action, verificationCode);
+
+    await mailTransporter.sendMail({
+        from: "admin@minervacg.com.alexharris.design",
+        to: email,
         subject: subject,
         text: message
     });
+}
 
-    console.log("Email sent: " + info.messageId);
+function generateVerificationEmail(language, action, verificationCode) {
+    let subject = "";
+    let message = "";
+
+    switch (action) {
+        case "edit_username":
+            switch (language) {
+                case "spanish":
+                    subject = "Código de Verificación de Cambio de Nombre de Usuario";
+                    message = "Su solicitud de cambio de nombre de usuario ha sido recibida. Utilice el código a continuación para cambiar su nombre de usuario.\n\n" + verificationCode + "\n\nSi no solicitó este cambio, contáctenos de inmediato.";
+                    break;
+                case "french":
+                    subject = "Code de Vérification de Changement de Nom d'Utilisateur";
+                    message = "Votre demande de changement de nom d'utilisateur a été reçue. Utilisez le code ci-dessous pour changer votre nom d'utilisateur.\n\n" + verificationCode + "\n\nSi vous n'avez pas demandé ce changement, veuillez nous contacter immédiatement.";
+                    break;
+                default:
+                    subject = "Username Change Verification Code";
+                    message = "Your username change request has been received. Use the code below to change your username.\n\n" + verificationCode + "\n\nIf you did not request this change, please contact us immediately.";
+                    break;
+            }
+            break;
+        case "password_reset":
+            switch (language) {
+                case "spanish":
+                    subject = "Código de Verificación de Restablecimiento de Contraseña";
+                    message = "Su solicitud de restablecimiento de contraseña ha sido recibida. Utilice el código a continuación para restablecer su contraseña.\n\n" + verificationCode + "\n\nSi no solicitó este cambio, contáctenos de inmediato.";
+                    break;
+                case "french":
+                    subject = "Code de Vérification de Réinitialisation de Mot de Passe";
+                    message = "Votre demande de réinitialisation de mot de passe a été reçue. Utilisez le code ci-dessous pour réinitialiser votre mot de passe.\n\n" + verificationCode + "\n\nSi vous n'avez pas demandé ce changement, veuillez nous contacter immédiatement.";
+                    break;
+                default:
+                    subject = "Password Reset Verification Code";
+                    message = "Your password reset request has been received. Use the code below to reset your password.\n\n" + verificationCode + "\n\nIf you did not request this change, please contact us immediately.";
+                    break;
+            }
+            break;
+    }
+
+    return { subject, message };
 }
 
 function sanitizeData(data) {
