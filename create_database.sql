@@ -13,7 +13,8 @@ CREATE TABLE USER_LOGIN (
     EMAIL VARCHAR(255) NOT NULL,
     USERNAME VARCHAR(255) NOT NULL,
     PASS VARCHAR(255) NOT NULL,
-    SALT VARCHAR(255) NOT NULL
+    SALT VARCHAR(255) NOT NULL,
+    LAST_USERNAME_CHANGE TIMESTAMP NOT NULL
 );
 
 CREATE TABLE SCORES (
@@ -170,7 +171,7 @@ BEGIN
         SET tokenID = UUID();
 
         -- Insert user
-        INSERT INTO USER_LOGIN (EMAIL, USERNAME, PASS, SALT) VALUES (input_email, input_username, SHA2(CONCAT(input_pass, salt), 256), salt);
+        INSERT INTO USER_LOGIN (EMAIL, USERNAME, PASS, SALT, LAST_USERNAME_CHANGE) VALUES (input_email, input_username, SHA2(CONCAT(input_pass, salt), 256), salt, NOW());
         INSERT INTO SCORES (OVERALL_LEVEL, ID, LOCATION_STREAK, SOURCE_STREAK, TOPIC_STREAK, LOCATION_STREAK_HIGH, SOURCE_STREAK_HIGH, TOPIC_STREAK_HIGH, LOCATION_TOTAL_CORRECT, SOURCE_TOTAL_CORRECT, TOPIC_TOTAL_CORRECT, TOTAL_PLAYED, LOCATION_LEVEL, SOURCE_LEVEL, TOPIC_LEVEL, LAST_DATE)
             VALUES (1, (SELECT ID FROM USER_LOGIN WHERE EMAIL = input_email), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, NOW());
         INSERT INTO USER_INFO (DATEJOINED, ID) VALUES (NOW(), (SELECT ID FROM USER_LOGIN WHERE EMAIL = input_email));
@@ -772,6 +773,7 @@ CREATE PROCEDURE edit_username(IN input_sensitive_token CHAR(255), IN input_new_
 BEGIN
     DECLARE isValid INT DEFAULT 0;
     DECLARE userID INT;
+    DECLARE lastUsernameChange TIMESTAMP;
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
@@ -788,13 +790,24 @@ BEGIN
         -- Get user id
         SELECT ID INTO userID FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token;
 
-        -- Update username
-        UPDATE USER_LOGIN SET USERNAME = input_new_username WHERE ID = userID;
+        -- Get last username change
+        SELECT LAST_USERNAME_CHANGE INTO lastUsernameChange FROM USER_LOGIN WHERE ID = userID;
 
-        -- Delete sensitive token
-        DELETE FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token;
+        -- Check if username change is too recent
+        IF lastUsernameChange > DATE_SUB(NOW(), INTERVAL 30 DAY) THEN
+            -- Delete sensitive token
+            DELETE FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token;
 
-        INSERT INTO RESPONSE VALUES ('SUCCESS', 'USERNAME_UPDATED');
+            INSERT INTO RESPONSE VALUES ('ERROR', 'USERNAME_CHANGE_TOO_RECENT');
+        ELSE
+            -- Update username
+            UPDATE USER_LOGIN SET USERNAME = input_new_username WHERE ID = userID;
+
+            -- Delete sensitive token
+            DELETE FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token;
+
+            INSERT INTO RESPONSE VALUES ('SUCCESS', 'USERNAME_UPDATED');
+        END IF;
     END IF;
 
     SELECT * FROM RESPONSE;
