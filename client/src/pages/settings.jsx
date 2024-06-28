@@ -10,7 +10,7 @@ export default class Settings extends React.Component {
     constructor(props) {
         super(props);
 
-        this.handleEditUsername = this.handleEditUsername.bind(this);
+        this.requestVerification = this.requestVerification.bind(this);
     }
 
     handleEditUsername() {
@@ -21,12 +21,32 @@ export default class Settings extends React.Component {
             },
             body: JSON.stringify({
                 token: localStorage.getItem("token"),
-                action: "edit_username",
+                action: "EDIT_USERNAME",
                 language: localStorage.getItem("language")
             }),
         }).then((data) => {
             if (data.status === 200) {
                 window.location = "/edit_username";
+            } else {
+                alert("An error occurred. Please try again later.");
+            }
+        });
+    }
+
+    requestVerification(action) {
+        fetch("/api/request_verification", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                token: localStorage.getItem("token"),
+                action: action.toUpperCase(),
+                language: localStorage.getItem("language")
+            })
+        }).then((data) => {
+            if (data.status === 200) {
+                window.location = "/" + action;
             } else {
                 alert("An error occurred. Please try again.");
             }
@@ -44,7 +64,8 @@ export default class Settings extends React.Component {
                     justifyContent: "center",
                 }}>
                     <h1>{Strings.Settings(language)}</h1>
-                    <Button label={Strings.EditUsername(language)} onClick={this.handleEditUsername}/>
+                    <Button label={Strings.EditUsername(language)} onClick={() => this.requestVerification("edit_username")}/>
+                    <Button label={Strings.ResetPassword(language)} onClick={() => this.requestVerification("reset_password")}/>
                 </div>
             )}
             </LanguageContext.Consumer>

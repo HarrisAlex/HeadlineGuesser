@@ -7,7 +7,7 @@ import Strings from '../constants/Strings';
 import VerificationCodeModal from '../components/verificationCodeModal';
 import Button from '../components/button';
 
-export default class EditUsername extends React.Component {
+export default class ResetPassword extends React.Component {
     constructor(props) {
         super(props);
 
@@ -15,33 +15,36 @@ export default class EditUsername extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
 
         this.state = {
-            username: ""
+            newPassword: ""
         }
     }
 
     onInputChange(event) {
-        this.setState({ username: event.target.value });
+        this.setState({ newPassword: event.target.value });
     }
 
     handleSubmit() {
-        fetch("/api/edit_username", {
+        fetch("/api/reset_password", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 sensitiveToken: sessionStorage.getItem("sensitiveToken"),
-                newUsername: this.state.username
+                newPassword: this.state.newPassword
             })
         }).then((data) => {
             if (data.status === 200) {
-                localStorage.setItem("username", this.state.username);
+                localStorage.removeItem("token");
+                localStorage.removeItem("username");
+                window.location = "/index";
             } else {
                 data.json().then((data) => {
-                    console.error("Username change failed: " + data.message);
+                    console.error("Password change failed: " + data.message);
                 });
             }
-            window.location.href = "/settings";
+
+            window.location = "/settings";
         });
     }
 
@@ -50,7 +53,7 @@ export default class EditUsername extends React.Component {
             <LanguageContext.Consumer>
             {(language) => (
                 <div>
-                    <p>Enter your new username:</p>
+                    <p>Enter your new password:</p>
                     <input type="text" style={{
                         width: "100%",
                         height: "2rem",
@@ -59,7 +62,7 @@ export default class EditUsername extends React.Component {
                         marginBottom: "1rem",
                     }} onChange={this.onInputChange} />
                     <Button label={Strings.Submit(language)} onClick={this.handleSubmit} />
-                    <VerificationCodeModal action="EDIT_USERNAME" />
+                    <VerificationCodeModal action="RESET_PASSWORD" />
                 </div>
             )}
             </LanguageContext.Consumer>

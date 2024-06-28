@@ -27,7 +27,7 @@ const responseCodes = {
     invalidLanguage: "INVALID_LANGUAGE",
     invalidQuestion: "INVALID_QUESTION",
     invalidAnswer: "INVALID_ANSWER",
-}
+};
 
 // Database
 const db = require('./database.js');
@@ -81,8 +81,6 @@ app.post("/api/login", (req, res) => {
         }
 
         const response = result[0][0];
-
-        console.log(response);
 
         if (response.RESPONSE_STATUS === "ERROR") {
             return res.status(400).json({ message: response.RESPONSE_MESSAGE });
@@ -448,19 +446,19 @@ app.get("/api/get_avatar", (req, res) => {
 // +==================================+
 // |            Verify API            |
 // +==================================+
-// Incoming: { token, code }
+// Incoming: { token, code, action }
 // Outgoing: { status, sensitiveToken }
 app.post("/api/verify", (req, res) => {
-    const { token, code } = req.body;
+    const { token, code, action } = req.body;
 
-    if (!token || !code) {
+    if (!token || !code || !action) {
         return res.status(400).json({ message: responseCodes.missingInput });
     }
 
-    const data = sanitizeData({ token, code });
+    const data = sanitizeData({ token, code, action });
 
-    const sql = "CALL verify(?, ?)";
-    const params = [data.token, data.code];
+    const sql = "CALL verify(?, ?, ?)";
+    const params = [data.token, data.code, data.action];
 
     db.query(sql, params, function(err, result) {
         if (err) {
@@ -509,6 +507,35 @@ app.post("/api/edit_username", (req, res) => {
 });
 
 // +==================================+
+// |        Reset Password API        |
+// +==================================+
+// Incoming: { sensitiveToken, newPassword }
+// Outgoing: { status }
+app.post("/api/reset_password", (req, res) => {
+    const { sensitiveToken, newPassword } = req.body;
+
+    const data = sanitizeData({ sensitiveToken, newPassword });
+
+    const sql = "CALL reset_password(?, ?)";
+    const params = [data.sensitiveToken, data.newPassword];
+
+    db.query(sql, params, function(err, result) {
+        if (err) {
+            console.log(`SQL database error ${err}`);
+            return res.status(500).json({ message: responseCodes.serverError });
+        }
+
+        const response = result[0][0];
+
+        if (response.RESPONSE_STATUS === "ERROR") {
+            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        }
+
+        return res.status(200).json({ message: response.RESPONSE_MESSAGE });
+    });
+});
+
+// +==================================+
 // |     Request Verification API     |
 // +==================================+
 // Incoming: { token, action, language }
@@ -519,13 +546,12 @@ app.post("/api/request_verification", (req, res) => {
     const data = sanitizeData({ token, action, language });
     const verificationCode = generateNumberSequence(8);
 
-    const sql = "CALL request_verification(?, ?)";
-    const params = [data.token, verificationCode];
+    const sql = "CALL request_verification(?, ?, ?)";
+    const params = [data.token, verificationCode, action];
 
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            console.log(result[0]);
             return res.status(500).json({ message: responseCodes.serverError });
         }
 
@@ -556,7 +582,7 @@ function generateVerificationEmail(language, action, verificationCode) {
     let subject = "";
     let message = "";
 
-    switch (action) {
+    switch (action.toLowerCase()) {
         case "edit_username":
             switch (language) {
                 case "spanish":
@@ -573,7 +599,7 @@ function generateVerificationEmail(language, action, verificationCode) {
                     break;
             }
             break;
-        case "password_reset":
+        case "reset_password":
             switch (language) {
                 case "spanish":
                     subject = "Código de Verificación de Restablecimiento de Contraseña";

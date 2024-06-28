@@ -95,6 +95,18 @@ export default class Strings {
         }
     }
 
+    static ResetPassword(language) {
+        switch (language) {
+            case "spanish":
+                return "Restablecer Contraseña";
+            case "french":
+                return "Réinitialiser le Mot de Passe";
+            case "english":
+            default:
+                return "Reset Password";
+        }
+    }
+
     static Logout(language) {
         switch (language) {
             case "spanish":

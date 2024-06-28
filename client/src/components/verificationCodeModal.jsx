@@ -32,7 +32,8 @@ export default class VerificationCodeModal extends React.Component {
             },
             body: JSON.stringify({
                 token: localStorage.getItem("token"),
-                code: this.state.code
+                code: this.state.code,
+                action: this.props.action
             })
         }).then((data) => {
             if (data.status === 200) {
