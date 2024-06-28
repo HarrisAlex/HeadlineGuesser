@@ -95,6 +95,19 @@ export default class Strings {
         }
     }
 
+    static GenericError(language) {
+        switch (language) {
+            case "spanish":
+                return "Ocurrió un error. Por favor, inténtalo de nuevo más tarde.";
+            case "french":
+                return "Une erreur s'est produite. Veuillez réessayer plus tard.";
+            case "english":
+            default:
+                return "An error occurred. Please try again later.";
+        }
+    }
+
+
     static ResetPassword(language) {
         switch (language) {
             case "spanish":

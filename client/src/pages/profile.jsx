@@ -9,6 +9,7 @@ import Colors from '../constants/Colors.jsx';
 import Avatar from '../components/avatar.jsx';
 import AvatarEditor from '../components/avatarEditor.jsx';
 import Button from '../components/button.jsx';
+import Wrappers from '../constants/Wrappers.jsx';
 
 export default class Profile extends React.Component {
     constructor (props) {
@@ -170,6 +171,8 @@ export default class Profile extends React.Component {
                 });
             }
         });
+
+        this.setState({ friendStatus: "FRIEND_REQUEST_NOT_SENT" });
     }
 
     openAvatarEditor() {
@@ -188,18 +191,10 @@ export default class Profile extends React.Component {
                 username: user
             })
         }).then((data) => {
-            // Check for successful response
-            if (data.status === 200) {
-                window.location.reload();
-            } else if (data.status === 400) {
-                data.json().then((data) => {
-                    if (data.message === "INVALID_TOKEN") {
-                        localStorage.removeItem("token");
-                        localStorage.removeItem("username");
-                        window.location = "/login?error=INVALID_TOKEN";
-                    }
-                });
-            }
+            Wrappers.BackendResponse(
+                data, 
+                (json) => { window.location.reload(); },
+                (json) => {} );
         });
     }
 

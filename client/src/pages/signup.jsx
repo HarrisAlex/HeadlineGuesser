@@ -46,7 +46,7 @@ export default class Signup extends React.Component {
             })
         }).then((data) => {
             // Check for successful response
-            if (data.status === 200) {
+            if (data.status === 201) {
                 data.json().then((data) => {
                     localStorage.setItem("token", data.token);
                     localStorage.setItem("username", data.username);

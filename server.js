@@ -66,7 +66,7 @@ app.post("/api/login", (req, res) => {
     const { email, pass } = req.body;
 
     if (!email || !pass) {
-        return res.status(400).json({ message: responseCodes.missingInput });
+        return res.status(430);
     }
 
     const data = sanitizeData({ email, pass });
@@ -99,7 +99,7 @@ app.post("/api/signup", (req, res) => {
     const { email, username, pass } = req.body;
 
     if (!email || !username || !pass) {
-        return res.status(400).json({ message: responseCodes.missingInput });
+        return res.status(430);
     }
 
     const data = sanitizeData({ email, username, pass});
@@ -115,11 +115,11 @@ app.post("/api/signup", (req, res) => {
 
         const response = result[0][0];
 
-        if (response.RESPONSE_STATUS === "ERROR") {
-            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        if (isErrorStatus(response.RESPONSE_STATUS)) {
+            return res.status(response.RESPONSE_STATUS);
         }
 
-        return res.status(200).json({ message: responseCodes.signupSuccess, token: response.RESPONSE_MESSAGE, username: response.USERNAME });
+        return res.status(response.RESPONSE_STATUS).json({ token: response.RESPONSE_MESSAGE, username: response.USERNAME });
     });
 });
 
@@ -196,11 +196,12 @@ app.post("/api/update_scores", (req, res) => {
     const { token, locationCorrect, sourceCorrect, topicCorrect } = req.body;
 
     if (!token || locationCorrect === undefined || sourceCorrect === undefined || topicCorrect === undefined) {
-        return res.status(400).json({ message: responseCodes.missingInput });
+        return res.status(430);
     }
 
+    // Check if the answers are in the correct format
     if (typeof locationCorrect !== "boolean" || typeof sourceCorrect !== "boolean" || typeof topicCorrect !== "boolean")
-        return res.status(400).json({ message: responseCodes.invalidAnswerFormat });
+        return res.status(406).json({ message: responseCodes.invalidAnswerFormat });
 
     const data = sanitizeData({ token, locationCorrect, sourceCorrect, topicCorrect });
 
@@ -284,7 +285,7 @@ app.post("/api/add_friend", (req, res) => {
     const { token, username } = req.body;
 
     if (!token || !username) {
-        return res.status(400).json({ message: responseCodes.missingInput });
+        return res.status(430);
     }
 
     const data = sanitizeData({ token, username });
@@ -317,7 +318,7 @@ app.post("/api/get_friend_status", (req, res) => {
     const { token, username } = req.body;
 
     if (!token || !username) {
-        return res.status(400).json({ message: responseCodes.missingInput });
+        return res.status(430);
     }
 
     const data = sanitizeData({ token, username });
@@ -386,7 +387,7 @@ app.post("/api/set_avatar", (req, res) => {
     const { token, colors, foreground } = req.body;
 
     if (!token || !colors || foreground === undefined) {
-        return res.status(400).json({ message: responseCodes.missingInput });
+        return res.status(430);
     }
 
     const data = sanitizeData({ token, colors, foreground });
@@ -452,7 +453,7 @@ app.post("/api/verify", (req, res) => {
     const { token, code, action } = req.body;
 
     if (!token || !code || !action) {
-        return res.status(400).json({ message: responseCodes.missingInput });
+        return res.status(430);
     }
 
     const data = sanitizeData({ token, code, action });
@@ -485,6 +486,10 @@ app.post("/api/verify", (req, res) => {
 app.post("/api/edit_username", (req, res) => {
     const { sensitiveToken, newUsername } = req.body;
 
+    if (!sensitiveToken || !newUsername) {
+        return res.status(430);
+    }
+
     const data = sanitizeData({ sensitiveToken, newUsername });
 
     const sql = "CALL edit_username(?, ?)";
@@ -514,6 +519,10 @@ app.post("/api/edit_username", (req, res) => {
 app.post("/api/reset_password", (req, res) => {
     const { sensitiveToken, newPassword } = req.body;
 
+    if (!sensitiveToken || !newPassword) {
+        return res.status(430);
+    }
+
     const data = sanitizeData({ sensitiveToken, newPassword });
 
     const sql = "CALL reset_password(?, ?)";
@@ -542,6 +551,10 @@ app.post("/api/reset_password", (req, res) => {
 // Outgoing: { status }
 app.post("/api/request_verification", (req, res) => {
     const { token, action, language } = req.body;
+
+    if (!token || !action || !language) {
+        return res.status(430);
+    }
 
     const data = sanitizeData({ token, action, language });
     const verificationCode = generateNumberSequence(8);
@@ -683,4 +696,12 @@ function isCorrectAnswer(language, question, answer) {
 
 function getQuestionSet(language) {
     return questionBank.languageQuestionSets[language];
+}
+
+function isErrorStatus(status) {
+    return status >= 400 && status < 600;
+}
+
+function isSuccessfulStatus(status) {
+    return status >= 200 && status < 300;
 }

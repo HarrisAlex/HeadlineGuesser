@@ -13,26 +13,6 @@ export default class Settings extends React.Component {
         this.requestVerification = this.requestVerification.bind(this);
     }
 
-    handleEditUsername() {
-        fetch("/api/request_verification", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                token: localStorage.getItem("token"),
-                action: "EDIT_USERNAME",
-                language: localStorage.getItem("language")
-            }),
-        }).then((data) => {
-            if (data.status === 200) {
-                window.location = "/edit_username";
-            } else {
-                alert("An error occurred. Please try again later.");
-            }
-        });
-    }
-
     requestVerification(action) {
         fetch("/api/request_verification", {
             method: "POST",
@@ -48,7 +28,7 @@ export default class Settings extends React.Component {
             if (data.status === 200) {
                 window.location = "/" + action;
             } else {
-                alert("An error occurred. Please try again.");
+                alert(Strings.GenericError(localStorage.getItem("language")));
             }
         });
     }

@@ -152,7 +152,7 @@ BEGIN
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
+        RESPONSE_STATUS INT,
         RESPONSE_MESSAGE VARCHAR(255),
         USERNAME VARCHAR(255)
     );
@@ -162,9 +162,9 @@ BEGIN
 
     -- Check if email already exists and password is valid
     IF emailExists > 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'EMAIL_EXISTS');
+        INSERT INTO RESPONSE VALUES (427, 'EMAIL_EXISTS');
     ELSEIF passLength < 8 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'PASSWORD_LENGTH_ERROR');
+        INSERT INTO RESPONSE VALUES (406, 'PASSWORD_LENGTH_ERROR');
     ELSE
         -- Generate salt
         SET salt = HEX(RANDOM_BYTES(64));
@@ -183,7 +183,7 @@ BEGIN
         SELECT ID INTO userID FROM USER_LOGIN WHERE EMAIL = input_email;
         INSERT INTO TOKEN_TABLE (TOKEN, EXPIRATION_DATE, ID) VALUES (tokenID, DATE_ADD(NOW(), INTERVAL 1 DAY), userID);
 
-        INSERT INTO RESPONSE VALUES ('SUCCESS', tokenID, input_username);
+        INSERT INTO RESPONSE VALUES (201, tokenID, input_username);
     END IF;
 
     SELECT * FROM RESPONSE;
