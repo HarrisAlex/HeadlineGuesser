@@ -8,6 +8,7 @@ import Colors from '../constants/Colors.jsx';
 import Modal from './modal.jsx';
 import Button from './button.jsx';
 import Avatar from './avatar.jsx';
+import API from '../constants/API.jsx';
 
 export default class AvatarEditor extends React.Component {
     constructor(props) {
@@ -70,33 +71,12 @@ export default class AvatarEditor extends React.Component {
     }
 
     saveAvatar() {
-        fetch("/api/set_avatar", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                token: localStorage.getItem("token"),
-                colors: this.state.colors,
-                foreground: this.state.foreground
-            })
-        }).then((data) => {
-            // Check for successful response
-            if (data.status === 200) {
-                // Avatar saved
-                window.location.reload();
-            } else if (data.status === 400) {
-                data.json().then((data) => {
-                    // Check error type
-                    if (data.message === "INVALID_TOKEN") {
-                        // Invalid token
-                        localStorage.removeItem("token");
-                        localStorage.removeItem("username");
-                        window.location = "/index?error=INVALID_TOKEN";
-                    }
-                });
-            }
-        });
+        // Send request to backend to save avatar
+        API.post("/api/set_avatar", {
+            token: localStorage.getItem("token"),
+            colors: this.state.colors,
+            foreground: this.state.foreground
+        }, this, () => { window.location.reload(); }, () => { alert(Strings.GenericError(localStorage.getItem("language"))); });
     }
 
     render() {

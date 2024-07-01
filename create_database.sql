@@ -153,7 +153,7 @@ BEGIN
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
         RESPONSE_STATUS INT,
-        RESPONSE_MESSAGE VARCHAR(255),
+        TOKEN VARCHAR(255),
         USERNAME VARCHAR(255)
     );
 
@@ -162,9 +162,11 @@ BEGIN
 
     -- Check if email already exists and password is valid
     IF emailExists > 0 THEN
-        INSERT INTO RESPONSE VALUES (427, 'EMAIL_EXISTS');
+        -- Email already exists
+        INSERT INTO RESPONSE VALUES (427, NULL, NULL);
     ELSEIF passLength < 8 THEN
-        INSERT INTO RESPONSE VALUES (406, 'PASSWORD_LENGTH_ERROR');
+        -- Password too short
+        INSERT INTO RESPONSE VALUES (406, NULL, NULL);
     ELSE
         -- Generate salt
         SET salt = HEX(RANDOM_BYTES(64));
@@ -183,6 +185,7 @@ BEGIN
         SELECT ID INTO userID FROM USER_LOGIN WHERE EMAIL = input_email;
         INSERT INTO TOKEN_TABLE (TOKEN, EXPIRATION_DATE, ID) VALUES (tokenID, DATE_ADD(NOW(), INTERVAL 1 DAY), userID);
 
+        -- Sucessfully created user
         INSERT INTO RESPONSE VALUES (201, tokenID, input_username);
     END IF;
 
@@ -206,8 +209,7 @@ BEGIN
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255),
+        RESPONSE_STATUS INT,
         TOKEN CHAR(255),
         USERNAME VARCHAR(255)
     );
@@ -216,7 +218,8 @@ BEGIN
     SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE EMAIL = input_email;
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER', NULL, NULL);
+        -- User does not exist
+        INSERT INTO RESPONSE VALUES (404, NULL, NULL);
     ELSE
         -- Get user id and salt
         SELECT ID, SALT INTO userID, userSalt FROM USER_LOGIN WHERE EMAIL = input_email;
@@ -224,7 +227,7 @@ BEGIN
 
         -- Check if password is valid
         IF hashsedPass != (SELECT PASS FROM USER_LOGIN WHERE ID = userID) THEN
-            INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER', NULL, NULL);
+            INSERT INTO RESPONSE VALUES (406, NULL, NULL);
         ELSE
             -- Check for existing token
             IF (SELECT COUNT(*) FROM TOKEN_TABLE WHERE ID = userID AND EXPIRATION_DATE > NOW()) > 0 THEN
@@ -235,7 +238,8 @@ BEGIN
                 INSERT INTO TOKEN_TABLE (TOKEN, EXPIRATION_DATE, ID) VALUES (tokenID, DATE_ADD(NOW(), INTERVAL 1 DAY), userID);
             END IF;
             
-            INSERT INTO RESPONSE VALUES ('SUCCESS', 'VALIDATED_USER', tokenID, (SELECT USERNAME FROM USER_LOGIN WHERE ID = userID));
+            -- Successfully validated user and created token
+            INSERT INTO RESPONSE VALUES (201, tokenID, (SELECT USERNAME FROM USER_LOGIN WHERE ID = userID));
         END IF;
     END IF;
 
@@ -268,15 +272,15 @@ BEGIN
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255)
+        RESPONSE_STATUS INT
     );
 
     -- Check if token is valid
     SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
+        -- Invalid token
+        INSERT INTO RESPONSE VALUES (401);
     ELSE
         -- Get user id
         SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
@@ -368,7 +372,7 @@ BEGIN
             WHERE ID = userID;
 
         -- Update score
-        INSERT INTO RESPONSE VALUES ('SUCCESS', 'SCORE_UPDATED');
+        INSERT INTO RESPONSE VALUES (209);
     END IF;
 
     SELECT * FROM RESPONSE;
@@ -401,8 +405,7 @@ BEGIN
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255),
+        RESPONSE_STATUS INT,
         USERNAME VARCHAR(255),
         OVERALL_LEVEL INT,
         LOCATION_STREAK INT,
@@ -424,7 +427,8 @@ BEGIN
     SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE USERNAME = input_username;
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        -- User does not exist
+        INSERT INTO RESPONSE VALUES (404, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     ELSE
         -- Get user info
         SELECT ID INTO userID FROM USER_LOGIN WHERE USERNAME = input_username;
@@ -447,7 +451,8 @@ BEGIN
         SELECT TOPIC_LEVEL INTO userTopicLevel FROM SCORES WHERE ID = userID;
         SELECT DATEJOINED INTO userJoinDate FROM USER_INFO WHERE ID = userID;
 
-        INSERT INTO RESPONSE VALUES ('SUCCESS', 'USER_FOUND', outputUsername, 
+        -- Found user, grabbing information
+        INSERT INTO RESPONSE VALUES (200, outputUsername, 
             userOverallLevel, 
             userLocationStreak, 
             userSourceStreak, 
@@ -480,15 +485,15 @@ BEGIN
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255)
+        RESPONSE_STATUS INT
     );
 
     -- Check if token is valid
     SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token;
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
+        -- Invalid token
+        INSERT INTO RESPONSE VALUES (401);
     ELSE
         -- Get user id
         SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
@@ -497,7 +502,8 @@ BEGIN
         SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE USERNAME = input_friend_username;
 
         IF isValid = 0 THEN
-            INSERT INTO RESPONSE VALUES ('ERROR', 'NONEXISTENT_USER');
+            -- Friend does not exist
+            INSERT INTO RESPONSE VALUES (404);
         ELSE
             -- Get friend id
             SELECT ID INTO friendID FROM USER_LOGIN WHERE USERNAME = input_friend_username;
@@ -508,14 +514,16 @@ BEGIN
             IF isValid > 0 THEN
                 SELECT COUNT(*) INTO isValid FROM FRIENDS WHERE ID = friendID AND FRIEND = userID;
                 
-                INSERT INTO RESPONSE VALUES ('ERROR', 'FRIEND_ALREADY_ADDED');
+                -- Are already friends
+                INSERT INTO RESPONSE VALUES (427);
             ELSE
                 IF userID = friendID THEN
-                    INSERT INTO RESPONSE VALUES ('ERROR', 'CANNOT_FRIEND_SELF');
+                    -- Cannot friend self
+                    INSERT INTO RESPONSE VALUES (406);
                 ELSE
-                    -- Add friend
+                    -- Add friend, create entry in table
                     INSERT INTO FRIENDS VALUES (userID, friendID);
-                    INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIEND_ADDED');
+                    INSERT INTO RESPONSE VALUES (201);
                 END IF;
             END IF;
         END IF;
@@ -536,15 +544,16 @@ BEGIN
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255)
+        RESPONSE_STATUS INT,
+        FRIEND_STATUS VARCHAR(255)
     );
 
     -- Check if token is valid
     SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token;
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
+        -- Invalid token
+        INSERT INTO RESPONSE VALUES (401);
     ELSE
         -- Get user id
         SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
@@ -553,7 +562,8 @@ BEGIN
         SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE USERNAME = input_friend_username;
 
         IF isValid = 0 THEN
-            INSERT INTO RESPONSE VALUES ('ERROR', 'NONEXISTENT_USER');
+            -- Friend does not exist
+            INSERT INTO RESPONSE VALUES (404);
         ELSE
             -- Get friend id
             SELECT ID INTO friendID FROM USER_LOGIN WHERE USERNAME = input_friend_username;
@@ -565,15 +575,19 @@ BEGIN
                 SELECT COUNT(*) INTO isValid FROM FRIENDS WHERE ID = friendID AND FRIEND = userID;
 
                 IF isValid > 0 THEN
-                    INSERT INTO RESPONSE VALUES ('SUCCESS', 'ALREADY_FRIENDS');
+                    -- Are already friends
+                    INSERT INTO RESPONSE VALUES (200, 'ALREADY_FRIENDS');
                 ELSE
-                    INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIEND_REQUEST_SENT');
+                    -- Friend request already sent
+                    INSERT INTO RESPONSE VALUES (200, 'FRIEND_REQUEST_SENT');
                 END IF;
             ELSE
                 IF userID = friendID THEN
-                    INSERT INTO RESPONSE VALUES ('ERROR', 'CANNOT_FRIEND_SELF');
+                    -- Cannot friend self
+                    INSERT INTO RESPONSE VALUES (427, 'CANNOT_FRIEND_SELF');
                 ELSE
-                    INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIEND_REQUEST_NOT_SENT');
+                    -- Not friends
+                    INSERT INTO RESPONSE VALUES (200, 'FRIEND_REQUEST_NOT_SENT');
                 END IF;
             END IF;
         END IF;
@@ -598,8 +612,7 @@ BEGIN
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255),
+        RESPONSE_STATUS INT,
         FRIEND_USERNAME VARCHAR(255)
     );
 
@@ -607,12 +620,13 @@ BEGIN
 
     -- Check if user exists
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER', NULL);
+        INSERT INTO RESPONSE VALUES (404, NULL);
     ELSE
         -- Get user id
         SELECT ID INTO userID FROM USER_LOGIN WHERE USERNAME = input_username;
 
-        INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIENDS_FOUND', NULL);
+        -- Header row for response
+        INSERT INTO RESPONSE VALUES (200, 'FRIENDS');
 
         OPEN friendCursor;
 
@@ -633,7 +647,8 @@ BEGIN
             SELECT COUNT(*) INTO isValid FROM FRIENDS WHERE ID = friendID AND FRIEND = userID;
 
             IF isValid > 0 THEN
-                INSERT INTO RESPONSE VALUES ('SUCCESS', 'FRIEND_FOUND', friendUsername);
+                -- Add row for mutual friend
+                INSERT INTO RESPONSE VALUES (200, friendUsername);
             END IF;
         END LOOP;
 
@@ -654,15 +669,15 @@ BEGIN
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255)
+        RESPONSE_STATUS INT
     );
 
     -- Check if token is valid
     SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
     
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
+        -- Invalid token
+        INSERT INTO RESPONSE VALUES (401);
     ELSE
         -- Get user id
         SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
@@ -670,7 +685,8 @@ BEGIN
         -- Update avatar
         UPDATE AVATARS SET BGCOLOR = input_bgcolor, BORDERCOLOR = input_bordercolor, FGCOLOR = input_fgcolor, FOREGROUND = input_foreground WHERE ID = userID;
 
-        INSERT INTO RESPONSE VALUES ('SUCCESS', 'AVATAR_UPDATED');
+        -- Avatar updated
+        INSERT INTO RESPONSE VALUES (209);
     END IF;
 
     SELECT * FROM RESPONSE;
@@ -691,8 +707,7 @@ BEGIN
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255),
+        RESPONSE_STATUS INT,
         BGCOLOR INT,
         BORDERCOLOR INT,
         FGCOLOR INT,
@@ -702,7 +717,8 @@ BEGIN
     SELECT COUNT(*) INTO isValid FROM USER_LOGIN WHERE USERNAME = input_username;
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_USER', NULL, NULL, NULL, NULL);
+        -- User does not exist
+        INSERT INTO RESPONSE VALUES (404, NULL, NULL, NULL, NULL);
     ELSE
         -- Get user id
         SELECT ID INTO userID FROM USER_LOGIN WHERE USERNAME = input_username;
@@ -710,7 +726,8 @@ BEGIN
         -- Get avatar
         SELECT BGCOLOR, BORDERCOLOR, FGCOLOR, FOREGROUND INTO user_bgcolor, user_bordercolor, user_fgcolor, user_foreground FROM AVATARS WHERE ID = userID;
 
-        INSERT INTO RESPONSE VALUES ('SUCCESS', 'AVATAR_FOUND', user_bgcolor, user_bordercolor, user_fgcolor, user_foreground);
+        -- Grab user's avatar
+        INSERT INTO RESPONSE VALUES (200, user_bgcolor, user_bordercolor, user_fgcolor, user_foreground);
     END IF;
 
     SELECT * FROM RESPONSE;
@@ -728,8 +745,7 @@ BEGIN
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255),
+        RESPONSE_STATUS INT,
         EMAIL VARCHAR(255)
     );
 
@@ -737,7 +753,8 @@ BEGIN
     SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN', NULL);
+        -- Invalid token
+        INSERT INTO RESPONSE VALUES (401, NULL);
     ELSE
         -- Get user email
         SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
@@ -749,7 +766,8 @@ BEGIN
         -- Insert verification code
         INSERT INTO VERIFICATION_CODES (CODE, EXPIRATION_DATE, TARGET_ACTION, ID) VALUES (user_code, DATE_ADD(NOW(), INTERVAL 10 MINUTE), input_action, userID);
 
-        INSERT INTO RESPONSE VALUES ('SUCCESS', 'VALID_TOKEN', userEmail);
+        -- Return user's email
+        INSERT INTO RESPONSE VALUES (200, userEmail);
     END IF;
 
     SELECT * FROM RESPONSE;
@@ -767,8 +785,7 @@ BEGIN
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255),
+        RESPONSE_STATUS INT,
         SENSITIVE_TOKEN CHAR(255)
     );
 
@@ -776,7 +793,7 @@ BEGIN
     SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN', NULL);
+        INSERT INTO RESPONSE VALUES (401, NULL);
     ELSE
         -- Get token ID
         SELECT ID INTO userID FROM TOKEN_TABLE WHERE TOKEN = input_token;
@@ -785,7 +802,8 @@ BEGIN
         SELECT COUNT(*) INTO isValid FROM VERIFICATION_CODES WHERE CODE = input_code AND EXPIRATION_DATE > NOW() AND ID = userID AND TARGET_ACTION = input_action;
 
         IF isValid = 0 THEN
-            INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_CODE', NULL);
+            -- Invalid code
+            INSERT INTO RESPONSE VALUES (401, NULL);
         ELSE
             -- Delete verification code
             DELETE FROM VERIFICATION_CODES WHERE CODE = input_code;
@@ -799,7 +817,8 @@ BEGIN
             -- Insert sensitive token
             INSERT INTO SENSITIVE_TOKENS (TOKEN, EXPIRATION_DATE, TARGET_ACTION, ID) VALUES (sensitiveToken, DATE_ADD(NOW(), INTERVAL 10 MINUTE), input_action, userID);
 
-            INSERT INTO RESPONSE VALUES ('SUCCESS', 'VERIFIED', sensitiveToken);
+            -- Return sensitive token
+            INSERT INTO RESPONSE VALUES (200, sensitiveToken);
         END IF;
     END IF;
 
@@ -818,15 +837,15 @@ BEGIN
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255)
+        RESPONSE_STATUS INT
     );
 
     -- Check if token is valid
     SELECT COUNT(*) INTO isValid FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token AND EXPIRATION_DATE > NOW() AND TARGET_ACTION = 'EDIT_USERNAME';
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
+        -- Invalid token
+        INSERT INTO RESPONSE VALUES (401);
     ELSE
         -- Get user id
         SELECT ID INTO userID FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token;
@@ -839,7 +858,8 @@ BEGIN
             -- Delete sensitive token
             DELETE FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token;
 
-            INSERT INTO RESPONSE VALUES ('ERROR', 'USERNAME_CHANGE_TOO_RECENT');
+            -- Username change too recent
+            INSERT INTO RESPONSE VALUES (425);
         ELSE
             -- Update username
             UPDATE USER_LOGIN SET USERNAME = input_new_username WHERE ID = userID;
@@ -847,7 +867,8 @@ BEGIN
             -- Delete sensitive token
             DELETE FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token;
 
-            INSERT INTO RESPONSE VALUES ('SUCCESS', 'USERNAME_UPDATED');
+            -- Username updated
+            INSERT INTO RESPONSE VALUES (209);
         END IF;
     END IF;
 
@@ -866,15 +887,15 @@ BEGIN
 
     -- Create response table
     CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255)
+        RESPONSE_STATUS INT
     );
 
     -- Check if token is valid
     SELECT COUNT(*) INTO isValid FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token AND EXPIRATION_DATE > NOW() AND TARGET_ACTION = 'RESET_PASSWORD'; 
 
     IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
+        -- Invalid token
+        INSERT INTO RESPONSE VALUES (401);
     ELSE
         -- Get user id
         SELECT ID INTO userID FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token;
@@ -888,7 +909,8 @@ BEGIN
         -- Delete sensitive token
         DELETE FROM SENSITIVE_TOKENS WHERE TOKEN = input_sensitive_token;
 
-        INSERT INTO RESPONSE VALUES ('SUCCESS', 'PASSWORD_UPDATED');
+        -- Password updated
+        INSERT INTO RESPONSE VALUES (209);
     END IF;
 
     SELECT * FROM RESPONSE;
@@ -949,41 +971,32 @@ END //
 DELIMITER ;
 
 DELIMITER //
--- TOKEN VALIDATION
-CREATE PROCEDURE token_validation(IN input_token CHAR(255))
+-- DELETE OLD VERIFICATION CODES
+CREATE PROCEDURE delete_old_verification_codes()
 BEGIN
-    DECLARE isValid INT DEFAULT 0;
+    DELETE FROM VERIFICATION_CODES WHERE EXPIRATION_DATE < NOW();
+END //
+DELIMITER ;
 
-    CREATE TEMPORARY TABLE IF NOT EXISTS RESPONSE (
-        RESPONSE_STATUS VARCHAR(20),
-        RESPONSE_MESSAGE VARCHAR(255)
-    );
-
-    -- Check if token is valid
-    SELECT COUNT(*) INTO isValid FROM TOKEN_TABLE WHERE TOKEN = input_token AND EXPIRATION_DATE > NOW();
-
-    IF isValid = 0 THEN
-        INSERT INTO RESPONSE VALUES ('ERROR', 'INVALID_TOKEN');
-    ELSE 
-        INSERT INTO RESPONSE VALUES ('SUCCESS', 'VALID_TOKEN');
-    END IF;
-
-    SELECT * FROM RESPONSE;
-    DROP TEMPORARY TABLE RESPONSE;
+DELIMITER //
+-- DELETE OLD SENSITIVE TOKENS
+CREATE PROCEDURE delete_old_sensitive_tokens()
+BEGIN
+    DELETE FROM SENSITIVE_TOKENS WHERE EXPIRATION_DATE < NOW();
 END //
 DELIMITER ;
 
 -- Delete old tokens every 12 hours
-CREATE EVENT IF NOT EXISTS delete_old_token_event
-ON SCHEDULE EVERY 12 HOUR
-DO 
-    CALL delete_old_tokens;
+CREATE EVENT IF NOT EXISTS delete_old_token_event ON SCHEDULE EVERY 12 HOUR DO CALL delete_old_tokens;
+
+-- Delete old verification codes 5 minutes
+CREATE EVENT IF NOT EXISTS delete_old_verification_codes_event ON SCHEDULE EVERY 5 MINUTE DO CALL delete_old_verification_codes;
+
+-- Delete old sensitive tokens every 5 minutes
+CREATE EVENT IF NOT EXISTS delete_old_sensitive_tokens_event ON SCHEDULE EVERY 5 MINUTE DO CALL delete_old_sensitive_tokens;
 
 -- Update leaderboard every 1 minute
-CREATE EVENT IF NOT EXISTS update_leaderboard_event
-ON SCHEDULE EVERY 1 MINUTE
-DO
-    CALL update_leaderboard;
+CREATE EVENT IF NOT EXISTS update_leaderboard_event ON SCHEDULE EVERY 1 MINUTE DO CALL update_leaderboard;
 
 CALL insert_user_login('apple', 'apple', 'password');
 CALL insert_user_login('banana', 'banana', 'password');

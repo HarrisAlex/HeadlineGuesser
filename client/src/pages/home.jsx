@@ -5,6 +5,7 @@ import { LanguageContext } from '../contexts/LanguageContext.js';
 import Strings from '../constants/Strings.jsx';
 
 import Button from '../components/button.jsx';
+import API from '../constants/API.jsx';
 
 export default function Home() {
     const context = useContext(LanguageContext);
@@ -22,23 +23,10 @@ export default function Home() {
 
     useEffect(() => {
         if (mode === "question") {            
-            fetch("/api/question", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ language: context.languageIndex })
-            }).then((data) => {
-                // Check for successful response
-                if (data.status === 200) {
-                    // Switch to question mode
-                    data.json().then((dataJson) => {
-                        // Set current question
-                        setQuestion(dataJson.questionString);
-                        setQuestionIndex(dataJson.question);
-                        setChoices(dataJson.choices);
-                    });
-                }
+            API.post("/api/question", { language: context.languageIndex }, (data) => {
+                setQuestion(data.questionString);
+                setQuestionIndex(data.question);
+                setChoices(data.choices);
             });
         }   
     }, [mode, context]);
@@ -103,23 +91,10 @@ export default function Home() {
 }
 
 function checkAnswer(language, questionIndex, choice, callback) {
-    fetch("/api/answer", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            language: language,
-            question: questionIndex,
-            answer: choice
-        })
-    })
-    .then((data) => {
-        // Check for successful response
-        if (data.status === 200) {
-            data.json().then((dataJson) => {
-                callback(dataJson.correct);
-            });
-        }
-    });
+    // Ping the server to check the answer
+    API.post("/api/answer", {
+        language: language,
+        question: questionIndex,
+        answer: choice
+    }, (data) => { callback(data.correct) });
 }

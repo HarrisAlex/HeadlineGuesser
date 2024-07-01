@@ -3,6 +3,7 @@ import React from 'react';
 import { LanguageContext } from '../contexts/LanguageContext';
 
 import Strings from '../constants/Strings';
+import API from '../constants/API.jsx';
 
 import VerificationCodeModal from '../components/verificationCodeModal';
 import Button from '../components/button';
@@ -24,27 +25,15 @@ export default class ResetPassword extends React.Component {
     }
 
     handleSubmit() {
-        fetch("/api/reset_password", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                sensitiveToken: sessionStorage.getItem("sensitiveToken"),
-                newPassword: this.state.newPassword
-            })
-        }).then((data) => {
-            if (data.status === 200) {
-                localStorage.removeItem("token");
-                localStorage.removeItem("username");
-                window.location = "/index";
-            } else {
-                data.json().then((data) => {
-                    console.error("Password change failed: " + data.message);
-                });
-            }
-
-            window.location = "/settings";
+        // Send reset password request to backend
+        API.post("/api/reset_password", {
+            sensitiveToken: sessionStorage.getItem("sensitiveToken"),
+            newPassword: this.state.newPassword
+        }, () => {
+            // Log out user if password reset is successful
+            localStorage.removeItem("token");
+            localStorage.removeItem("username");
+            window.location = "/index";
         });
     }
 
@@ -66,8 +55,6 @@ export default class ResetPassword extends React.Component {
                 </div>
             )}
             </LanguageContext.Consumer>
-            
-            
         );
     }
 }

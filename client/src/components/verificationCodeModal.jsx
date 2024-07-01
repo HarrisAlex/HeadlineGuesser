@@ -6,6 +6,7 @@ import Strings from '../constants/Strings.jsx';
 
 import Modal from './modal.jsx';
 import Button from './button.jsx';
+import API from '../constants/API.jsx';
 
 export default class VerificationCodeModal extends React.Component {
     constructor(props) {
@@ -25,25 +26,12 @@ export default class VerificationCodeModal extends React.Component {
     }
 
     handleSubmit() {
-        fetch("/api/verify", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                token: localStorage.getItem("token"),
-                code: this.state.code,
-                action: this.props.action
-            })
-        }).then((data) => {
-            if (data.status === 200) {
-                data.json().then((data) => {
-                    sessionStorage.setItem("sensitiveToken", data.sensitiveToken);
-                });
-            } else {
-                console.error("Verification failed");
-            }
-        });
+        // Send verification request to backend
+        API.post("/api/verify", {
+            token: localStorage.getItem("token"),
+            code: this.state.code,
+            action: this.props.action
+        }, (data) => { sessionStorage.setItem("sensitiveToken", data.sensitiveToken); }, () => { console.error(Strings.VerificationFailed(localStorage.getItem("language"))); });
 
         this.setState({ closed: true });
     }

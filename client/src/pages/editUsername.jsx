@@ -6,6 +6,7 @@ import Strings from '../constants/Strings';
 
 import VerificationCodeModal from '../components/verificationCodeModal';
 import Button from '../components/button';
+import API from '../constants/API.jsx';
 
 export default class EditUsername extends React.Component {
     constructor(props) {
@@ -24,25 +25,14 @@ export default class EditUsername extends React.Component {
     }
 
     handleSubmit() {
-        fetch("/api/edit_username", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                sensitiveToken: sessionStorage.getItem("sensitiveToken"),
-                newUsername: this.state.username
-            })
-        }).then((data) => {
-            if (data.status === 200) {
-                localStorage.setItem("username", this.state.username);
-            } else {
-                data.json().then((data) => {
-                    console.error("Username change failed: " + data.message);
-                });
-            }
-            window.location.href = "/settings";
-        });
+        // Edit username in the database
+        API.post("/api/edit_username", { sensitiveToken: sessionStorage.getItem("sensitiveToken"), newUsername: this.state.username }, () => {
+            // Change the username in the local storage
+            localStorage.setItem("username", this.state.username);
+
+            // Redirect to the settings page
+            window.location = "/settings";
+        }, () => { window.location = "/settings"; });
     }
 
     render() {
@@ -63,8 +53,6 @@ export default class EditUsername extends React.Component {
                 </div>
             )}
             </LanguageContext.Consumer>
-            
-            
         );
     }
 }

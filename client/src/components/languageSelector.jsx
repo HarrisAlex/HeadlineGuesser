@@ -6,6 +6,7 @@ import Button from './button.jsx';
 
 import Modal from './modal.jsx';
 import Strings from '../constants/Strings.jsx';
+import API from '../constants/API.jsx';
 
 export default class LanguageSelector extends React.Component {
     static contextType = LanguageContext;
@@ -19,19 +20,10 @@ export default class LanguageSelector extends React.Component {
     }
 
     componentDidMount() {
-        fetch("/api/languages", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            },
-         }).then((data) => {
-            // Check for successful response
-             if (data.status === 200) {
-                data.json().then((data) => {
-                    this.setState({ languages: data.languages });
-                });
-             }
-         });
+        // Get languages from backend
+        API.get("/api/languages", (data) => {
+            this.setState({ languages: data.languages });
+        });
     }
 
     render() {

@@ -9,7 +9,7 @@ import Colors from '../constants/Colors.jsx';
 import Avatar from '../components/avatar.jsx';
 import AvatarEditor from '../components/avatarEditor.jsx';
 import Button from '../components/button.jsx';
-import Wrappers from '../constants/Wrappers.jsx';
+import API from '../constants/API.jsx';
 
 export default class Profile extends React.Component {
     constructor (props) {
@@ -64,86 +64,56 @@ export default class Profile extends React.Component {
         const urlParams = new URLSearchParams(window.location.search);
         const user = urlParams.get("user");
 
-        // Retrieve user from backend
-        fetch("/api/get_user?user=" + user, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            },
-        }).then((data) => {
-            // Check for successful response
-            if (data.status === 200) {
-                data.json().then((data) => {
-                    // Set user information
-                    this.setState({ 
-                        username: data.username,
-                        level: data.overallLevel,
-                        streaks: {
-                            location: data.streaks.location,
-                            locationHigh: data.streaks.locationHigh,
-                            source: data.streaks.source,
-                            sourceHigh: data.streaks.sourceHigh,
-                            topic: data.streaks.topic,
-                            topicHigh: data.streaks.topicHigh
-                        },
-                        accuracy: {
-                            location: Math.floor(data.accuracy.location * 100),
-                            source: Math.floor(data.accuracy.source * 100),
-                            topic: Math.floor(data.accuracy.topic * 100)
-                        },
-                        totalPlayed: data.totalPlayed,
-                        levels: {
-                            location: data.levels.location,
-                            source: data.levels.source,
-                            topic: data.levels.topic
-                        }
-                    });
+        // Retrieve user information from backend
+        API.get("/api/get_user?user=" + user, this, (data) => {
+            // Set user information
+            this.setState({ 
+                username: data.username,
+                level: data.overallLevel,
+                streaks: {
+                    location: data.streaks.location,
+                    locationHigh: data.streaks.locationHigh,
+                    source: data.streaks.source,
+                    sourceHigh: data.streaks.sourceHigh,
+                    topic: data.streaks.topic,
+                    topicHigh: data.streaks.topicHigh
+                },
+                accuracy: {
+                    location: Math.floor(data.accuracy.location * 100),
+                    source: Math.floor(data.accuracy.source * 100),
+                    topic: Math.floor(data.accuracy.topic * 100)
+                },
+                totalPlayed: data.totalPlayed,
+                levels: {
+                    location: data.levels.location,
+                    source: data.levels.source,
+                    topic: data.levels.topic
+                }
+            });
 
-                    // Parse date joined
-                    const date = new Date(data.dateJoined);
-                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                    this.setState({ dateJoined: date.toLocaleDateString(undefined, options) });
-                });
-            }
+            // Parse date joined
+            const date = new Date(data.dateJoined);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            this.setState({ dateJoined: date.toLocaleDateString(undefined, options) });
         });
 
         // Retrieve friends from backend
-        fetch("/api/get_friends?user=" + user, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }, 
-        }).then((data) => {
-            // Check for successful response
-            if (data.status === 200) {
-                data.json().then((data) => {
-                    // Set friends list
-                    this.setState({ friends: data.friends });
-                });
-            }
+        API.get("/api/get_friends?user=" + user, this, (data) => {
+            // Set friends list
+            this.setState({ friends: data.friends });
         });
 
         // Retrieve avatar from backend
-        fetch("/api/get_avatar?user=" + user, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            },
-        }).then((data) => {
-            // Check for successful response
-            if (data.status === 200) {
-                data.json().then((data) => {
-                    // Set avatar
-                    this.setState({ avatar: {
-                        colors: {
-                            background: data.colors.background,
-                            border: data.colors.border,
-                            foreground: data.colors.foreground
-                        },
-                        foreground: data.foreground
-                    } });
-                });
-            }
+        API.get("/api/get_avatar?user=" + user, this, (data) => {
+            // Set avatar
+            this.setState({ avatar: {
+                colors: {
+                    background: data.colors.background,
+                    border: data.colors.border,
+                    foreground: data.colors.foreground
+                },
+                foreground: data.foreground
+            } });
         });
 
         if (localStorage.getItem("username") === user 
@@ -152,24 +122,10 @@ export default class Profile extends React.Component {
             return;
         }
 
-        // Get friend status
-        fetch("/api/get_friend_status", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                token: localStorage.getItem("token"),
-                username: user
-            })
-        }).then((data) => {
-            // Check for successful response
-            if (data.status === 200) {
-                data.json().then((data) => {
-                    // Set friend status
-                    this.setState({ friendStatus: data.message });
-                });
-            }
+        // Retrieve friend status from backend
+        API.post("/api/get_friend_status", { token: localStorage.getItem("token"), username: user }, this, (data) => {
+            // Set friend status
+            this.setState({ friendStatus: data.friendStatus });
         });
 
         this.setState({ friendStatus: "FRIEND_REQUEST_NOT_SENT" });
@@ -181,21 +137,8 @@ export default class Profile extends React.Component {
 
     addFriend() {
         const user = new URLSearchParams(window.location.search).get("user");
-        fetch("/api/add_friend", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                token: localStorage.getItem("token"),
-                username: user
-            })
-        }).then((data) => {
-            Wrappers.BackendResponse(
-                data, 
-                (json) => { window.location.reload(); },
-                (json) => {} );
-        });
+
+        API.post("/api/add_friend", { token: localStorage.getItem("token"), username: user }, this, () => { window.location.reload(); });
     }
 
     render () {

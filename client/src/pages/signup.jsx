@@ -5,6 +5,7 @@ import Colors from '../constants/Colors.jsx';
 import TextBox from '../components/textBox.jsx';
 import Button from '../components/button.jsx';
 import { LanguageContext } from '../contexts/LanguageContext.js';
+import API from '../constants/API.jsx';
 
 export default class Signup extends React.Component {
     constructor(props) {
@@ -31,34 +32,20 @@ export default class Signup extends React.Component {
 
     handleSubmit(event) {
         event.preventDefault();
-        
-        // Send login request to backend
-        fetch("/api/signup", {
-            method: "POST",
-            headers: {
-            "Content-Type": "application/json"
-            },
-            // Send username and password to backend
-            body: JSON.stringify({
-                email: this.state.email,
-                username: this.state.username,
-                pass: this.state.password
-            })
-        }).then((data) => {
-            // Check for successful response
-            if (data.status === 201) {
-                data.json().then((data) => {
-                    localStorage.setItem("token", data.token);
-                    localStorage.setItem("username", data.username);
-                    window.location.href = "/index";
-                });
-            }
-            else {
-                data.json().then((data) => {
-                    const message = Strings.UserBackendResponse(data.message, localStorage.getItem("language"));
-                    this.setState({ error: message });
-                });
-            }
+
+        // Send signup request to backend
+        API.post("/api/signup", {
+            email: this.state.email,
+            username: this.state.username,
+            pass: this.state.password
+        }, (data) => {
+            // Set token and username in local storage
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("username", data.username);
+            window.location.href = "/index";
+        }, (data) => {
+            // Set error message
+            this.setState({ error: data.status });
         });
     }
 
@@ -98,7 +85,7 @@ export default class Signup extends React.Component {
                             <TextBox name="password" label={Strings.Password(language)} type="password" autoComplete="current-password" required onChange={this.handleInputChange}/>
                             <p style={{
                                 color: "red"
-                            }}>{this.state.error}</p>
+                            }}>{Strings.SignupError(this.state.error, language)}</p>
                             <Button label={Strings.Signup(language)} />
                         </form>
                     </div>

@@ -5,6 +5,7 @@ import Colors from '../constants/Colors.jsx';
 import TextBox from '../components/textBox.jsx';
 import Button from '../components/button.jsx';
 import { LanguageContext } from '../contexts/LanguageContext.js';
+import API from '../constants/API.jsx';
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -37,33 +38,15 @@ export default class Login extends React.Component {
 
     handleSubmit(event) {
         event.preventDefault();
-        
-        // Send login request to backend
-        fetch("/api/login", {
-            method: "POST",
-            headers: {
-            "Content-Type": "application/json"
-            },
-            // Send username and password to backend
-            body: JSON.stringify({
-                email: this.state.email,
-                pass: this.state.password
-            })
-        }).then((data) => {
-            // Check for successful response
-            if (data.status === 200) {
-                data.json().then((data) => {
-                    localStorage.setItem("token", data.token);
-                    localStorage.setItem("username", data.username);
 
-                    window.location = "/index";
-                });
-            }
-            else {
-                data.json().then((data) => {
-                    this.setState({ error: data.message });
-                });
-            }
+        // Send login request to backend
+        API.post("/api/login", { email: this.state.email, pass: this.state.password }, (data) => {
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("username", data.username);
+
+            window.location = "/index";
+        }, (data) => {
+            this.setState({ error: data.status });
         });
     }
 

@@ -4,6 +4,7 @@ import { LanguageContext } from '../contexts/LanguageContext.js';
 
 import Strings from '../constants/Strings.jsx';
 import Colors from '../constants/Colors.jsx';
+import API from '../constants/API.jsx';
 
 export default class Leaderboard extends React.Component {
     constructor(props) {
@@ -25,19 +26,9 @@ export default class Leaderboard extends React.Component {
         const leaderboard = urlParams.get("leaderboard");
 
         // Retrieve leaderboard from backend
-        fetch("/api/leaderboard?leaderboard=" + leaderboard, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            },
-         }).then((data) => {
-            // Check for successful response
-             if (data.status === 200) {
-                data.json().then((data) => {
-                    this.setState({ leaderboard: data.leaderboard });
-                });
-             }
-         });
+        API.get("/api/leaderboard?leaderboard=" + leaderboard, (data) => {
+            this.setState({ leaderboard: data.leaderboard });
+        });
     }
 
     render() {

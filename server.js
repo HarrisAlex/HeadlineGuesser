@@ -66,7 +66,7 @@ app.post("/api/login", (req, res) => {
     const { email, pass } = req.body;
 
     if (!email || !pass) {
-        return res.status(430);
+        return res.status(430).json({});
     }
 
     const data = sanitizeData({ email, pass });
@@ -77,16 +77,16 @@ app.post("/api/login", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         const response = result[0][0];
 
-        if (response.RESPONSE_STATUS === "ERROR") {
-            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        if (isErrorStatus(response.RESPONSE_STATUS)) {
+            return res.status(response.RESPONSE_STATUS).json({});
         }
 
-        return res.status(200).json({ message: responseCodes.loginSuccess, token: response.TOKEN, username: response.USERNAME});
+        return res.status(response.RESPONSE_STATUS).json({ token: response.TOKEN, username: response.USERNAME});
     }); 
 });
 
@@ -99,7 +99,7 @@ app.post("/api/signup", (req, res) => {
     const { email, username, pass } = req.body;
 
     if (!email || !username || !pass) {
-        return res.status(430);
+        return res.status(430).json({});
     }
 
     const data = sanitizeData({ email, username, pass});
@@ -110,16 +110,16 @@ app.post("/api/signup", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         const response = result[0][0];
 
         if (isErrorStatus(response.RESPONSE_STATUS)) {
-            return res.status(response.RESPONSE_STATUS);
+            return res.status(response.RESPONSE_STATUS).json({});
         }
 
-        return res.status(response.RESPONSE_STATUS).json({ token: response.RESPONSE_MESSAGE, username: response.USERNAME });
+        return res.status(response.RESPONSE_STATUS).json({ token: response.TOKEN, username: response.USERNAME });
     });
 });
 
@@ -139,7 +139,7 @@ app.post("/api/question", (req, res) => {
 
     if (!randomQuestion) {
         console.log("Error getting random question");
-        return res.status(500).json({ message: responseCodes.serverError });
+        return res.status(500).json({});
     }
 
    return res.status(200).json({ questionString: randomQuestion.question.question, question: randomQuestion.index, choices: randomQuestion.question.answers });
@@ -180,7 +180,7 @@ app.get("/api/leaderboard", (req, res) => {
     db.query(sql, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         return res.status(200).json({ leaderboard: result });
@@ -196,7 +196,7 @@ app.post("/api/update_scores", (req, res) => {
     const { token, locationCorrect, sourceCorrect, topicCorrect } = req.body;
 
     if (!token || locationCorrect === undefined || sourceCorrect === undefined || topicCorrect === undefined) {
-        return res.status(430);
+        return res.status(430).json({});
     }
 
     // Check if the answers are in the correct format
@@ -215,16 +215,12 @@ app.post("/api/update_scores", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         const response = result[0][0];
 
-        if (response.RESPONSE_STATUS === "ERROR") {
-            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
-        }
-
-        return res.status(200).json({ message: response.RESPONSE_MESSAGE });
+        return res.status(response.RESPONSE_STATUS).json({});
     });
 });
 
@@ -242,13 +238,13 @@ app.get("/api/get_user", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         const response = result[0][0];
 
-        if (response.RESPONSE_STATUS === "ERROR") {
-            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        if (isErrorStatus(response.RESPONSE_STATUS)) {
+            return res.status(response.RESPONSE_STATUS).json({});
         }
 
         const streakInfo = {
@@ -272,7 +268,7 @@ app.get("/api/get_user", (req, res) => {
             topic: response.TOPIC_LEVEL
         };
 
-        return res.status(200).json({ username: response.USERNAME, dateJoined: response.JOINDATE, overallLevel: response.OVERALL_LEVEL, streaks: streakInfo, accuracy: accuracyInfo, totalPlayed: response.TOTAL_PLAYED, levels: levelInfo });
+        return res.status(response.RESPONSE_STATUS).json({ username: response.USERNAME, dateJoined: response.JOINDATE, overallLevel: response.OVERALL_LEVEL, streaks: streakInfo, accuracy: accuracyInfo, totalPlayed: response.TOTAL_PLAYED, levels: levelInfo });
     });
 });
 
@@ -285,7 +281,7 @@ app.post("/api/add_friend", (req, res) => {
     const { token, username } = req.body;
 
     if (!token || !username) {
-        return res.status(430);
+        return res.status(430).json({});
     }
 
     const data = sanitizeData({ token, username });
@@ -296,16 +292,12 @@ app.post("/api/add_friend", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         const response = result[0][0];
 
-        if (response.RESPONSE_STATUS === "ERROR") {
-            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
-        }
-
-        return res.status(200).json({ message: response.RESPONSE_MESSAGE });
+        return res.status(response.RESPONSE_STATUS).json({});
     });
 });
 
@@ -318,7 +310,7 @@ app.post("/api/get_friend_status", (req, res) => {
     const { token, username } = req.body;
 
     if (!token || !username) {
-        return res.status(430);
+        return res.status(430).json({});
     }
 
     const data = sanitizeData({ token, username });
@@ -329,16 +321,12 @@ app.post("/api/get_friend_status", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         const response = result[0][0];
 
-        if (response.RESPONSE_STATUS === "ERROR") {
-            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
-        }
-
-        return res.status(200).json({ message: response.RESPONSE_MESSAGE });
+        return res.status(response.RESPONSE_STATUS).json({ friendStatus: response.FRIEND_STATUS });
     });
 });
 
@@ -356,17 +344,17 @@ app.get("/api/get_friends", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         const response = result[0][0];
 
-        if (response.RESPONSE_STATUS === "ERROR") {
-            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        if (isErrorStatus(response.RESPONSE_STATUS)) {
+            return res.status(response.RESPONSE_STATUS).json({});
         }
 
         if (result[0].length === 1)
-            return res.status(200).json({ friends: [] });
+            return res.status(response.RESPONSE_STATUS).json({ friends: [] });
 
         let friendsList = [];
 
@@ -374,7 +362,7 @@ app.get("/api/get_friends", (req, res) => {
             friendsList.push(result[0][i].FRIEND_USERNAME);
         }
 
-        return res.status(200).json({ friends: friendsList });
+        return res.status(response.RESPONSE_STATUS).json({ friends: friendsList });
     });
 });
 
@@ -387,7 +375,7 @@ app.post("/api/set_avatar", (req, res) => {
     const { token, colors, foreground } = req.body;
 
     if (!token || !colors || foreground === undefined) {
-        return res.status(430);
+        return res.status(430).json({});
     }
 
     const data = sanitizeData({ token, colors, foreground });
@@ -398,16 +386,12 @@ app.post("/api/set_avatar", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         const response = result[0][0];
 
-        if (response.RESPONSE_STATUS === "ERROR") {
-            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
-        }
-
-        return res.status(200).json({ message: response.RESPONSE_MESSAGE });
+        return res.status(response.RESPONSE_STATUS).json({});
     });
 });
 
@@ -424,16 +408,16 @@ app.get("/api/get_avatar", (req, res) => {
     db.query(sql, [id], function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         const response = result[0][0];
 
-        if (response.RESPONSE_STATUS === "ERROR") {
-            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        if (isErrorStatus(response.RESPONSE_STATUS)) {
+            return res.status(response.RESPONSE_STATUS).json({});
         }
 
-        return res.status(200).json({ 
+        return res.status(response.RESPONSE_STATUS).json({ 
             colors: { 
                 background: response.BGCOLOR, 
                 border: response.BORDERCOLOR, 
@@ -453,7 +437,7 @@ app.post("/api/verify", (req, res) => {
     const { token, code, action } = req.body;
 
     if (!token || !code || !action) {
-        return res.status(430);
+        return res.status(430).json({});
     }
 
     const data = sanitizeData({ token, code, action });
@@ -464,16 +448,16 @@ app.post("/api/verify", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         const response = result[0][0];
 
-        if (response.RESPONSE_STATUS === "ERROR") {
-            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        if (isErrorStatus(response.RESPONSE_STATUS)) {
+            return res.status(response.RESPONSE_STATUS).json({});
         }
 
-        return res.status(200).json({ sensitiveToken: response.SENSITIVE_TOKEN });
+        return res.status(response.RESPONSE_STATUS).json({ sensitiveToken: response.SENSITIVE_TOKEN });
     });
 });
 
@@ -487,7 +471,7 @@ app.post("/api/edit_username", (req, res) => {
     const { sensitiveToken, newUsername } = req.body;
 
     if (!sensitiveToken || !newUsername) {
-        return res.status(430);
+        return res.status(430).json({});
     }
 
     const data = sanitizeData({ sensitiveToken, newUsername });
@@ -498,16 +482,12 @@ app.post("/api/edit_username", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         const response = result[0][0];
 
-        if (response.RESPONSE_STATUS === "ERROR") {
-            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
-        }
-
-        return res.status(200).json({ message: response.RESPONSE_MESSAGE });
+        return res.status(response.RESPONSE_STATUS).json({});
     });
 });
 
@@ -520,7 +500,7 @@ app.post("/api/reset_password", (req, res) => {
     const { sensitiveToken, newPassword } = req.body;
 
     if (!sensitiveToken || !newPassword) {
-        return res.status(430);
+        return res.status(430).json({});
     }
 
     const data = sanitizeData({ sensitiveToken, newPassword });
@@ -531,16 +511,12 @@ app.post("/api/reset_password", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         const response = result[0][0];
 
-        if (response.RESPONSE_STATUS === "ERROR") {
-            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
-        }
-
-        return res.status(200).json({ message: response.RESPONSE_MESSAGE });
+        return res.status(response.RESPONSE_STATUS).json({});
     });
 });
 
@@ -553,7 +529,7 @@ app.post("/api/request_verification", (req, res) => {
     const { token, action, language } = req.body;
 
     if (!token || !action || !language) {
-        return res.status(430);
+        return res.status(430).json({});
     }
 
     const data = sanitizeData({ token, action, language });
@@ -565,18 +541,19 @@ app.post("/api/request_verification", (req, res) => {
     db.query(sql, params, function(err, result) {
         if (err) {
             console.log(`SQL database error ${err}`);
-            return res.status(500).json({ message: responseCodes.serverError });
+            return res.status(500).json({});
         }
 
         const response = result[0][0];
 
-        if (response.RESPONSE_STATUS === "ERROR") {
-            return res.status(400).json({ message: response.RESPONSE_MESSAGE });
+        
+        if (isErrorStatus(response.RESPONSE_STATUS)) {
+            return res.status(response.RESPONSE_STATUS).json({});
         }
 
         sendVerificationCodeEmail(response.EMAIL, data.language, verificationCode, data.action);
 
-        return res.status(200).json({ message: response.RESPONSE_MESSAGE });
+        return res.status(response.RESPONSE_STATUS).json({});
     });    
 });
 

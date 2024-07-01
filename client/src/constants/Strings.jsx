@@ -168,6 +168,18 @@ export default class Strings {
         }
     }
 
+    static VerificationFailed(language) {
+        switch (language) {
+            case "spanish":
+                return "La verificación falló";
+            case "french":
+                return "La vérification a échoué";
+            case "english":
+            default:
+                return "Verification failed";
+        }
+    }
+
     static Submit(language) {
         switch (language) {
             case "spanish":
@@ -490,9 +502,9 @@ export default class Strings {
         }
     }
 
-    static LoginError(response, language) {
+    static SignupError(response, language) {
         switch (response) {
-            case "EMAIL_EXISTS":
+            case 427:
                 switch (language) {
                     case "spanish":
                         return "El correo electrónico ya existe";
@@ -502,7 +514,7 @@ export default class Strings {
                     default:
                         return "Email already exists";
                 }
-            case "PASSWORD_LENGTH_ERROR":
+            case 406:
                 switch (language) {
                     case "spanish":
                         return "La contraseña debe tener al menos 8 caracteres";
@@ -512,27 +524,25 @@ export default class Strings {
                     default:
                         return "Password must be at least 8 characters";
                 }
-            case "USER_CREATED":
+            default:
+                return response;
+        }
+    }
+
+    static LoginError(response, language) {
+        switch (response) {
+            case 404:
+            case 406:
                 switch (language) {
                     case "spanish":
-                        return "Usuario creado";
-                    case "french":
-                        return "Utilisateur créé";
-                    case "english":
-                    default:
-                        return "User created";
-                }
-            case "INVALID_USER":
-                switch (language) {
-                    case "spanish":
-                        return "Combinación de correo electrónico y contraseña no válida";
+                       return "Combinación de correo electrónico y contraseña no válida";
                     case "french":
                         return "Combinaison e-mail et mot de passe invalide";
                     case "english":
                     default:
                         return "Invalid email and password combination";
                 }
-            case "INVALID_TOKEN":
+            case 401:
                 switch (language) {
                     case "spanish":
                         return "Por favor, inicia sesión de nuevo";
@@ -541,7 +551,7 @@ export default class Strings {
                     case "english":
                     default:
                         return "Please sign in again";
-                }
+                } 
             default:
                 return response;
         }

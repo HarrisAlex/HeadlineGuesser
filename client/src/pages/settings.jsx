@@ -5,6 +5,7 @@ import { LanguageContext } from '../contexts/LanguageContext.js';
 import Button from '../components/button.jsx';
 
 import Strings from '../constants/Strings.jsx';
+import API from '../constants/API.jsx';
 
 export default class Settings extends React.Component {
     constructor(props) {
@@ -14,23 +15,12 @@ export default class Settings extends React.Component {
     }
 
     requestVerification(action) {
-        fetch("/api/request_verification", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                token: localStorage.getItem("token"),
-                action: action.toUpperCase(),
-                language: localStorage.getItem("language")
-            })
-        }).then((data) => {
-            if (data.status === 200) {
-                window.location = "/" + action;
-            } else {
-                alert(Strings.GenericError(localStorage.getItem("language")));
-            }
-        });
+        // Send request verification request to backend
+        API.post("/api/request_verification", {
+            token: localStorage.getItem("token"),
+            action: action.toUpperCase(),
+            language: localStorage.getItem("language")
+        }, (data) => { window.location = "/" + action; }, () => { alert(Strings.GenericError(localStorage.getItem("language"))); });
     }
 
     render() {
