@@ -1,48 +1,24 @@
 {
-    "languageQuestionSets": [
+    "english": [
         {
-            "language": "english",
+            "headline": "Biden family blame staff for debate performance as he lays low again at Camp David",
             "questions": [
                 {
-                    "question": "What is the capital of France?",
-                    "answers": [
-                        "Paris",
-                        "London",
-                        "Berlin",
-                        "Madrid"
+                    "sources": [
+                        "Fox News",
+                        "CNN",
+                        "CBS News",
+                        "The "
                     ],
-                    "correct": 0
+                    "locations": [
+                        "United States",
+                        "United Kingdom",
+                        "France",
+                        "Japan"
+                    ],
+                    "correctSource": 0,
+                    "correctLocation": 0
                 }   
-            ]
-        },
-        {
-            "language": "spanish",
-            "questions": [
-                {
-                    "question": "¿Cuál es la capital de España?",
-                    "answers": [
-                        "Paris",
-                        "London",
-                        "Berlin",
-                        "Madrid"
-                    ],
-                    "correct": 3
-                }
-            ]
-        },
-        {
-            "language": "french",
-            "questions": [
-                {
-                    "question": "Quelle est la capitale de l'Espagne?",
-                    "answers": [
-                        "Paris",
-                        "London",
-                        "Berlin",
-                        "Madrid"
-                    ],
-                    "correct": 3
-                }
             ]
         }
     ]
